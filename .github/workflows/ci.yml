@@ -1,0 +1,37 @@
+---
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  tests:
+    name: CI for ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    env:
+      USING_COVERAGE: "3.8,3.11"
+
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -VV
+          python -m site
+          python -m pip install --upgrade pip setuptools wheel poetry
+
+      - name: Run tests for ${{ matrix.python-version }}
+        run: |
+          poetry install
+          poetry run pytest
