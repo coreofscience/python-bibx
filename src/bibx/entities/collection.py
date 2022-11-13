@@ -8,10 +8,6 @@ from bibx.entities.article import Article
 class Collection:
     articles: List[Article]
 
-    @classmethod
-    def build(cls, context, type_):
-        if type_ == "a":
-            tales_a(context)
-        elif type_ == "b":
-            tales_b(context, type_)
-        ...
+    @property
+    def citation_pairs(self):
+        raise NotImplemented("We need implement this.")
