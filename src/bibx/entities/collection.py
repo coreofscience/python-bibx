@@ -10,4 +10,4 @@ class Collection:
 
     @property
     def citation_pairs(self):
-        raise NotImplemented("We need implement this.")
+        raise NotImplementedError("We need implement this.")
