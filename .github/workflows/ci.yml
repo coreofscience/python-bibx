@@ -34,5 +34,5 @@ jobs:
       - name: Run tests for ${{ matrix.python-version }}
         run: |
           poetry install
-          poetry run pre-commit --all
+          poetry run pre-commit run --all
           poetry run pytest
