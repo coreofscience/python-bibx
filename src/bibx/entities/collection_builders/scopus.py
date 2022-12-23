@@ -1,5 +1,6 @@
-from typing import Collection, TextIO
+from typing import TextIO
 
+from bibx.entities.collection import Collection
 from bibx.entities.collection_builders.base import CollectionBuilder
 
 

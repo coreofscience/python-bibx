@@ -1,6 +1,7 @@
-from typing import Collection, List
+from typing import List
 
 from bibx.entities.article import Article
+from bibx.entities.collection import Collection
 from bibx.entities.collection_builders.base import CollectionBuilder
 
 
