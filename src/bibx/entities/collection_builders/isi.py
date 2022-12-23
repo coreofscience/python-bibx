@@ -263,8 +263,11 @@ class IsiCollectionBuilder(CollectionBuilder):
             article = self._parse_article_as_str(article_as_str)
             yield article
             for reference in article.references or []:
-                reference_article = self._parse_reference_as_str(reference)
-                yield reference_article
+                try:
+                    reference_article = self._parse_reference_as_str(reference)
+                    yield reference_article
+                except InvalidIsiReference as e:
+                    logger.warn(f"{e}")
 
     @staticmethod
     def _parse_article_as_str(article_as_str: str) -> Article:
