@@ -20,3 +20,12 @@ class InvalidIsiReference(BibXError, ValueError):
 
     def __init__(self, reference: str):
         super().__init__(f"{reference} does not look like an ISI citation")
+
+
+class MissingCriticalInformation(BibXError, ValueError):
+    """
+    Raised when we don't have the publication year of an article.
+    """
+
+    def __init__(self):
+        super().__init__("Article is missing some critical information")

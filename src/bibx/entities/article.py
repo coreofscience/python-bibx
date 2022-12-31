@@ -12,7 +12,7 @@ class Article:
     issue: Optional[str] = None
     page: Optional[str] = None
     doi: Optional[str] = None
-    references: Optional[List[str]] = field(default_factory=list)
+    references: Optional[List["Article"]] = field(default_factory=list)
     keywords: Optional[List[str]] = field(default_factory=list)
     sources: Optional[Set[str]] = field(default_factory=set)
     extra: Optional[Mapping] = field(default_factory=dict)
