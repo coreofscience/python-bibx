@@ -1,9 +1,8 @@
-import bibtexparser
 import pandas as pd
 import networkx as nx
 
 # type: ignore
-def read_bib(bib_file_path):
+def get_references_df(scopus_file):
     with open(bib_file_path, 'r', encoding='utf-8') as bibtex_file:
         bib_database = bibtexparser.load(bibtex_file)
 
@@ -14,5 +13,6 @@ def read_bib(bib_file_path):
 
     # Change the name of the note column to 'times_cited'
     df_scopus.rename(columns={'note': 'times_cited'}, inplace=True)
+
 
     return df_scopus
