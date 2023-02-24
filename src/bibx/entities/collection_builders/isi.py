@@ -2,13 +2,18 @@ import collections
 import functools
 import logging
 import re
+from contextlib import suppress
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Iterable, List, Mapping, TextIO
+from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, TextIO
 
 from bibx.entities.article import Article
 from bibx.entities.collection import Collection
 from bibx.entities.collection_builders.base import CollectionBuilder
-from bibx.exceptions import InvalidIsiLineError, InvalidIsiReference
+from bibx.exceptions import (
+    InvalidIsiLineError,
+    InvalidIsiReference,
+    MissingCriticalInformation,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -260,22 +265,27 @@ class IsiCollectionBuilder(CollectionBuilder):
 
     def _get_articles_from_files(self) -> Iterable[Article]:
         for article_as_str in self._get_articles_as_str_from_files():
-            article = self._parse_article_as_str(article_as_str)
-            yield article
-            for reference in article.references or []:
-                try:
-                    reference_article = self._parse_reference_as_str(reference)
-                    yield reference_article
-                except InvalidIsiReference as e:
-                    logger.warn(f"{e}")
+            with suppress(MissingCriticalInformation):
+                article = self._parse_article_from_str(article_as_str)
+                yield article
 
-    @staticmethod
-    def _parse_article_as_str(article_as_str: str) -> Article:
+    @classmethod
+    def _get_articles_from_references(
+        cls, references: Optional[List[str]]
+    ) -> Iterable[Article]:
+        if not references:
+            return
+        for ref_str in references:
+            with suppress(InvalidIsiReference):
+                yield cls._parse_reference_from_str(ref_str)
+
+    @classmethod
+    def _parse_article_from_str(cls, article_as_str: str) -> Article:
         article_data = collections.defaultdict(list)
         article_data.setdefault("CR", [])
         field = None
         for line in article_as_str.split("\n"):
-            match = IsiCollectionBuilder.ISI_LINE_PATTERN.match(line)
+            match = cls.ISI_LINE_PATTERN.match(line)
             if not match:
                 raise InvalidIsiLineError(line)
             parsed = match.groupdict()
@@ -284,30 +294,35 @@ class IsiCollectionBuilder(CollectionBuilder):
                 continue
             article_data[field].append(parsed["value"])
 
-        processed = IsiCollectionBuilder._parse_all(dict(article_data))
+        processed = cls._parse_all(dict(article_data))
+
+        if not processed.get("year") or not processed.get("authors"):
+            raise MissingCriticalInformation()
+
         return Article(
+            authors=processed["authors"],
+            year=processed["year"],
             title=processed.get("title"),
-            authors=processed.get("authors", []),
-            # FIXME: Year is required here
-            year=processed.get("year", 1999),
             journal=processed.get("source_abbreviation"),
             volume=processed.get("volume"),
             issue=processed.get("issue"),
             page=processed.get("beginning_page"),
             doi=processed.get("DOI"),
-            references=processed.get("references"),
+            references=list(
+                cls._get_articles_from_references(processed.get("references"))
+            ),
             keywords=processed.get("keywords"),
             extra=processed,
             sources={article_as_str},
         )
 
-    @staticmethod
-    def _parse_reference_as_str(reference: str) -> Article:
-        match = IsiCollectionBuilder.ISI_CITATION_PATTERN.match(reference)
+    @classmethod
+    def _parse_reference_from_str(cls, reference: str) -> Article:
+        match = cls.ISI_CITATION_PATTERN.match(reference)
         if not match:
             raise InvalidIsiReference(reference)
         data = {key: [value] for key, value in match.groupdict().items() if value}
-        processed = IsiCollectionBuilder._parse_all(data)
+        processed = cls._parse_all(data)
         return Article(
             title=processed.get("title"),
             authors=processed.get("authors", []),
