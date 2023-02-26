@@ -4,16 +4,14 @@ import logging
 import re
 from contextlib import suppress
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, TextIO
+from typing import (Any, Callable, Dict, Iterable, List, Mapping, Optional,
+                    TextIO)
 
 from bibx.entities.article import Article
 from bibx.entities.collection import Collection
 from bibx.entities.collection_builders.base import CollectionBuilder
-from bibx.exceptions import (
-    InvalidIsiLineError,
-    InvalidIsiReference,
-    MissingCriticalInformation,
-)
+from bibx.exceptions import (InvalidIsiLineError, InvalidIsiReference,
+                             MissingCriticalInformation)
 
 logger = logging.getLogger(__name__)
 
@@ -324,6 +322,7 @@ class IsiCollectionBuilder(CollectionBuilder):
         data = {key: [value] for key, value in match.groupdict().items() if value}
         processed = cls._parse_all(data)
         return Article(
+            _label=reference,
             title=processed.get("title"),
             authors=processed.get("authors", []),
             # FIXME: Year is required here

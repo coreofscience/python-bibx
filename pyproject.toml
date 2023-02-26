@@ -8,6 +8,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.8"
+bibtexparser = "^1.4.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.10.0"
