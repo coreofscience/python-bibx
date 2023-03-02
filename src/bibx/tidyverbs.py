@@ -126,3 +126,31 @@ def get_references_edgelist(df):
     references_df_3 = references_df_3.apply(lambda x: x.astype(str).str.upper())
 
     return references_df_3
+
+def get_tos_graph(scopus_edgelist):
+    # Create a new dataframe called 'scopus_edgelist' that contains the 
+    # 'id_scopus' and 'id_reference' columns from the 'scopus_edgelist' dataframe
+    #
+    # Hint: Use the 'loc' function to select the columns
+    #
+    scopus_edgelist = scopus_edgelist.loc[:, ['id_scopus', 'id_reference']]
+    # create a directed graph object called 'G' using the 'scopus_edgelist' dataframe 
+    # and assign it to a new dataframe called 'G'
+    #
+    # Hint: Use the 'from_pandas_edgelist' function
+    #
+    G = nx.DiGraph()
+    G.add_edges_from(scopus_edgelist.values)
+    # Remove the edges that have self-loops from the graph object 'G'
+    #
+    # Hint: Use the 'remove_edges_from' function
+    #
+    G.remove_edges_from(nx.selfloop_edges(G))
+    # Remove the nodes that have in-degree equal to 1 and out-degree equal to 0
+    # from the graph object 'G'
+    #
+    # Hint: Use the 'remove_nodes_from' function
+    #
+    G.remove_nodes_from([n for n in G if G.in_degree(n) == 1 and G.out_degree(n) == 0])
+
+    return G
