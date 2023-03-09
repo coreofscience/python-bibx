@@ -324,6 +324,7 @@ class IsiCollectionBuilder(CollectionBuilder):
         data = {key: [value] for key, value in match.groupdict().items() if value}
         processed = cls._parse_all(data)
         return Article(
+            _label=reference,
             title=processed.get("title"),
             authors=processed.get("authors", []),
             # FIXME: Year is required here
