@@ -1,7 +1,7 @@
 import json
 import re
 from contextlib import suppress
-from typing import Iterable, TextIO
+from typing import Iterable, Optional, TextIO
 
 import bibtexparser
 
@@ -46,7 +46,7 @@ class ScopusCollectionBuilder(CollectionBuilder):
             sources={json.dumps(entry)},
         )
 
-    def _articles_from_references(self, references: str | None) -> Iterable[Article]:
+    def _articles_from_references(self, references: Optional[str]) -> Iterable[Article]:
         if references is None:
             references = ""
         for reference in references.split("; "):
