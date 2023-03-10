@@ -6,6 +6,10 @@ authors = ["Core of Science Team <technology@coreofscience.org>"]
 license = "MIT"
 readme = "README.md"
 
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.poetry.dependencies]
 python = "^3.8"
 bibtexparser = "^1.4.0"
@@ -17,6 +21,5 @@ flake8 = "^5.0.4"
 isort = "^5.12.0"
 pre-commit = "^2.20.0"
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.ruff]
+ignore = ["E501"]
