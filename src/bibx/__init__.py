@@ -1,11 +1,11 @@
-from io import StringIO
+from typing import TextIO
 
-from src.bibx.entities.collection import Collection
-from src.bibx.entities.collection_builders.isi import IsiCollectionBuilder
-from src.bibx.entities.collection_builders.scopus import ScopusCollectionBuilder
+from bibx.entities.collection import Collection
+from bibx.entities.collection_builders.isi import IsiCollectionBuilder
+from bibx.entities.collection_builders.scopus import ScopusCollectionBuilder
 
 
-def read_scopus(*files: StringIO) -> Collection:
+def read_scopus(*files: TextIO) -> Collection:
     """
     Takes any number of bibtex files from scopus and generates a collection.
 
@@ -15,7 +15,7 @@ def read_scopus(*files: StringIO) -> Collection:
     return ScopusCollectionBuilder(*files).build()
 
 
-def read_wos(*files: StringIO) -> Collection:
+def read_wos(*files: TextIO) -> Collection:
     """
     Takes any number of wos text files and returns a collection.
 
