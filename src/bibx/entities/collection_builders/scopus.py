@@ -53,7 +53,8 @@ class ScopusCollectionBuilder(CollectionBuilder):
             with suppress(MissingCriticalInformation):
                 yield self._article_from_reference(reference)
 
-    def _article_from_reference(self, reference: str) -> Article:
+    @staticmethod
+    def _article_from_reference(reference: str) -> Article:
         match = re.search(r"\((\d{4})\)", reference)
         if not match:
             raise MissingCriticalInformation()

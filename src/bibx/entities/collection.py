@@ -12,6 +12,19 @@ class Collection:
     articles: List[Article]
 
     @property
+    def all_articles(self) -> Iterable[Article]:
+        """
+        Yields all articles and references
+
+        :return: an iterable over `Article`.
+        """
+        cache = {article.key: article for article in self.articles}
+        for article in self.articles:
+            for reference in article.references:
+                cache.setdefault(reference.key, reference)
+        yield from cache.values()
+
+    @property
     def citation_pairs(self) -> Iterable[Tuple[Article, Article]]:
         cache = {article.key: article for article in self.articles}
         for article in self.articles:
@@ -21,6 +34,6 @@ class Collection:
                 # Yield a full article if we have the metadata for a citation
                 if article.key != reference.key and reference.key in cache:
                     logger.debug("Found a cache hit for key %s", reference.key)
-                    yield (article, cache[reference.key])
+                    yield article, cache[reference.key]
                 else:
-                    yield (article, reference)
+                    yield article, reference
