@@ -122,9 +122,7 @@ class Sap:
         for node in reversed(topological_order):
             nbs = list(g.successors(node))
             if nbs:
-                g.nodes[node][CONNECTIONS] = sum(
-                    g.nodes[n][CONNECTIONS] for n in nbs
-                )
+                g.nodes[node][CONNECTIONS] = sum(g.nodes[n][CONNECTIONS] for n in nbs)
 
         potential_leaves = [
             (node, g.nodes[node][CONNECTIONS])
@@ -139,8 +137,12 @@ class Sap:
             ]
 
         if self.max_leaf_age is not None:
-            potential_leaves = [(n, c) for n, c in potential_leaves if YEAR in g.nodes[n]]
-            newest_year = max(g.nodes[n][YEAR] for n, _ in potential_leaves if g.nodes[n][YEAR])
+            potential_leaves = [
+                (n, c) for n, c in potential_leaves if YEAR in g.nodes[n]
+            ]
+            newest_year = max(
+                g.nodes[n][YEAR] for n, _ in potential_leaves if g.nodes[n][YEAR]
+            )
             earliest_publication_year = newest_year - self.max_leaf_age
             potential_leaves = [
                 (n, c)
