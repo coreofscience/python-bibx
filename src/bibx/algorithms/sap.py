@@ -4,9 +4,6 @@ from typing import List, Tuple
 import networkx as nx
 
 YEAR = "year"
-
-CONNECTIONS = "_connections"
-
 LEAF = "leaf"
 ROOT = "root"
 TRUNK = "trunk"
@@ -40,6 +37,84 @@ class Sap:
         self.max_trunk = max_trunk
         self.min_leaf_connections = min_leaf_connections
         self.max_leaf_age = max_leaf_age
+
+    def _compute_root(self, graph: nx.DiGraph) -> nx.DiGraph:
+        """
+        Takes in a connected graph and returns it labeled with a `root` property.
+        :return: Labeled graph with the root property.
+        """
+        g = graph.copy()
+        valid_roots = [
+            (n, g.in_degree(n)) for n in g.nodes if g.out_degree(n) == 0  # noqa
+        ]
+        sorted_roots = _limit(valid_roots, self.max_roots)
+        nx.set_node_attributes(g, 0, ROOT)
+        for (node, degree) in sorted_roots:
+            g.nodes[node][ROOT] = degree
+        return g
+
+    def _compute_leaves(self, graph: nx.DiGraph) -> nx.DiGraph:
+        """
+        Takes in a connected graph and returns it labeled with a `leaf` property.
+        :param graph: Connected and filtered graph to work with.
+        :return: Labeled graph with the leaf property.
+        """
+        g = graph.copy()
+        try:
+            roots = [n for n, d in g.nodes(data=True) if d[ROOT] > 0]
+        except AttributeError:
+            raise TypeError("It's necessary to have some roots")
+        if not roots:
+            raise TypeError("It's necessary to have some roots")
+
+        nx.set_node_attributes(g, 0, ROOT_CONNECTIONS)
+        for node in roots:
+            g.nodes[node][ROOT_CONNECTIONS] = 1
+        topological_order = list(nx.topological_sort(g))
+        for node in reversed(topological_order):
+            nbs = list(g.successors(node))
+            if nbs:
+                g.nodes[node][ROOT_CONNECTIONS] = sum(
+                    g.nodes[n][ROOT_CONNECTIONS] for n in nbs
+                )
+
+        potential_leaves = [
+            (node, g.nodes[node][ROOT_CONNECTIONS])
+            for node in g.nodes
+            if g.in_degree(node) == 0  # noqa
+        ]
+        extended_leaves = potential_leaves[:]
+
+        if self.min_leaf_connections is not None:
+            potential_leaves = [
+                (n, c) for n, c in potential_leaves if c >= self.min_leaf_connections
+            ]
+
+        if self.max_leaf_age is not None:
+            potential_leaves = [
+                (n, c) for n, c in potential_leaves if YEAR in g.nodes[n]
+            ]
+            newest_year = max(
+                g.nodes[n][YEAR] for n, _ in potential_leaves if g.nodes[n][YEAR]
+            )
+            earliest_publication_year = newest_year - self.max_leaf_age
+            potential_leaves = [
+                (n, c)
+                for n, c in potential_leaves
+                if g.nodes[n][YEAR] >= earliest_publication_year
+            ]
+
+        if not potential_leaves:
+            logger.info(
+                "Reverting leaf cut policies, as they remove all possible leaves"
+            )
+            potential_leaves = extended_leaves
+
+        potential_leaves = _limit(potential_leaves, self.max_leaves)
+        nx.set_node_attributes(g, 0, LEAF)
+        for node, c in potential_leaves:
+            g.nodes[node][LEAF] = c
+        return g
 
     @staticmethod
     def _compute_sap(graph: nx.DiGraph) -> nx.DiGraph:
@@ -84,82 +159,6 @@ class Sap:
                 + g.nodes[node][ROOT_CONNECTIONS] * g.nodes[node][ELABORATE_SAP]
             )
 
-        return g
-
-    def _compute_root(self, graph: nx.DiGraph) -> nx.DiGraph:
-        """
-        Takes in a connected graph and returns it labeled with a `root` property.
-        :return: Labeled graph with the root property.
-        """
-        g = graph.copy()
-        valid_roots = [
-            (n, g.in_degree(n)) for n in g.nodes if g.out_degree(n) == 0
-        ]  # noqa
-        sorted_roots = _limit(valid_roots, self.max_trunk)
-        nx.set_node_attributes(g, 0, ROOT)
-        for (node, degree) in sorted_roots[: self.max_roots]:
-            g.nodes[node][ROOT] = degree
-        return g
-
-    def _compute_leaves(self, graph: nx.DiGraph) -> nx.DiGraph:
-        """
-        Takes in a connected graph and returns it labeled with a `leaf` property.
-        :param graph: Connected and filtered graph to work with.
-        :return: Labeled graph with the leaf property.
-        """
-        g = graph.copy()
-        try:
-            valid_root = [n for n, d in g.nodes(data=True) if d[ROOT] > 0]
-        except AttributeError:
-            raise TypeError("It's necessary to have some roots")
-        if not valid_root:
-            raise TypeError("It's necessary to have some roots")
-
-        nx.set_node_attributes(g, 0, CONNECTIONS)
-        for node in valid_root:
-            g.nodes[node][CONNECTIONS] = 1
-        topological_order = list(nx.topological_sort(g))
-        for node in reversed(topological_order):
-            nbs = list(g.successors(node))
-            if nbs:
-                g.nodes[node][CONNECTIONS] = sum(g.nodes[n][CONNECTIONS] for n in nbs)
-
-        potential_leaves = [
-            (node, g.nodes[node][CONNECTIONS])
-            for node in g.nodes
-            if g.in_degree(node) == 0
-        ]  # noqa
-        extended_leaves = potential_leaves[:]
-
-        if self.min_leaf_connections is not None:
-            potential_leaves = [
-                (n, c) for n, c in potential_leaves if c >= self.min_leaf_connections
-            ]
-
-        if self.max_leaf_age is not None:
-            potential_leaves = [
-                (n, c) for n, c in potential_leaves if YEAR in g.nodes[n]
-            ]
-            newest_year = max(
-                g.nodes[n][YEAR] for n, _ in potential_leaves if g.nodes[n][YEAR]
-            )
-            earliest_publication_year = newest_year - self.max_leaf_age
-            potential_leaves = [
-                (n, c)
-                for n, c in potential_leaves
-                if g.nodes[n][YEAR] >= earliest_publication_year
-            ]
-
-        if not potential_leaves:
-            logger.info(
-                "Reverting leaf cut policies, as they remove all possible leaves"
-            )
-            potential_leaves = extended_leaves
-
-        potential_leaves = _limit(potential_leaves, self.max_leaves)
-        nx.set_node_attributes(g, 0, LEAF)
-        for node, c in potential_leaves:
-            g.nodes[node][LEAF] = c
         return g
 
     def _compute_trunk(self, graph: nx.DiGraph) -> nx.DiGraph:
