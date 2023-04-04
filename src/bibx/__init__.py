@@ -3,6 +3,7 @@ from typing import TextIO
 
 import networkx as nx
 
+from bibx.entities.article import Article
 from bibx.entities.collection import Collection
 from bibx.entities.collection_builders.isi import IsiCollectionBuilder
 from bibx.entities.collection_builders.scopus import ScopusCollectionBuilder
@@ -28,6 +29,16 @@ def read_wos(*files: TextIO) -> Collection:
     return IsiCollectionBuilder(*files).build()
 
 
+def _add_article_info(g: nx.DiGraph, article: Article):
+    for key, val in dataclasses.asdict(article).items():
+        if key in ("sources", "references") or key.startswith("_"):
+            continue
+        try:
+            g.nodes[article.key][key] = val
+        except KeyError:
+            g.add_node(article.key, **{key: val})
+
+
 def create_graph(collection: Collection) -> nx.DiGraph:
     """
     Creates a `networkx.DiGraph` from a `Collection`.
@@ -41,13 +52,10 @@ def create_graph(collection: Collection) -> nx.DiGraph:
     g = nx.DiGraph()
     g.add_edges_from((u.key, v.key) for u, v in collection.citation_pairs)
     for article in collection.articles:
-        for key, val in dataclasses.asdict(article).items():
-            if key in ("sources", "references") or key.startswith("_"):
-                continue
-            try:
-                g.nodes[article.key][key] = val
-            except KeyError:
-                g.add_node(article.key, **{key: val})
+        for reference in article.references:
+            _add_article_info(g, reference)
+    for article in collection.articles:
+        _add_article_info(g, article)
     g.remove_edges_from(nx.selfloop_edges(g))
     return g
 
@@ -68,7 +76,8 @@ def clean_graph(g: nx.DiGraph) -> nx.DiGraph:
         [
             n
             for n in giant_component
-            if giant_component.in_degree(n) == 1 and giant_component.out_degree(n) == 0
+            if giant_component.in_degree(n) == 1  # noqa
+            and giant_component.out_degree(n) == 0  # noqa
         ]
     )
 

@@ -10,21 +10,21 @@ def create_toy_graph() -> nx.DiGraph:
     #      b
     #    / | \
     #   c  d  e
-    graph = nx.DiGraph()
+    g = nx.DiGraph()
     for node in "abcde":
-        graph.add_node(node, year=2000)
-    graph.add_edge("a", "b")
+        g.add_node(node, year=2000)
+    g.add_edge("a", "b")
     for node in "cde":
-        graph.add_edge("b", node)
-    return graph
+        g.add_edge("b", node)
+    return g
 
 
 def create_real_graph() -> nx.DiGraph:
     with open("./docs/examples/scopus.bib") as f:
         c = read_scopus(f)
-    graph = create_graph(c)
-    graph = clean_graph(graph)
-    return graph
+    g = create_graph(c)
+    g = clean_graph(g)
+    return g
 
 
 if __name__ == "__main__":
