@@ -19,11 +19,11 @@ def create_toy_graph() -> nx.DiGraph:
     g = nx.DiGraph()
     for n in "abcdefg":
         # we need to have years for all the nodes
-        g.create_node(n, year=2000)
+        g.add_node(n, year=2000)
     for n in "abc":
-        g.create_edge(n, "d")
+        g.add_edge(n, "d")
     for n in "efg":
-        g.create_edge("d", n)
+        g.add_edge("d", n)
     return g
 
 
