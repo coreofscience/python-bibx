@@ -8,6 +8,8 @@ from bibx.entities.collection import Collection
 from bibx.entities.collection_builders.isi import IsiCollectionBuilder
 from bibx.entities.collection_builders.scopus import ScopusCollectionBuilder
 
+__version__ = "0.0.1"
+
 
 def read_scopus(*files: TextIO) -> Collection:
     """
