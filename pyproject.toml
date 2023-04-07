@@ -1,26 +1,60 @@
-[tool.poetry]
+[project]
 name = "bibx"
-version = "0.1.0"
 description = "Python bibliometric tools."
-authors = ["Core of Science Team <technology@coreofscience.org>"]
+authors = [
+    {name = "Core of Science Team", email = "technology@coreofscience.org"},
+]
 license = "MIT"
 readme = "README.md"
+keywords = [
+    "bibliometrics",
+    "science",
+    "text mining",
+]
+dynamic = ["version"]
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+dependencies = [
+    "bibtexparser~=1.4.0",
+    "networkx~=3.0",
+]
 
-[tool.poetry.dependencies]
-python = "^3.8"
-bibtexparser = "^1.4.0"
-networkx = "^3.0"
-
-[tool.poetry.group.dev.dependencies]
-black = "^22.10.0"
-pytest = "^7.2.0"
-isort = "^5.12.0"
-pre-commit = "^2.20.0"
-ruff = "^0.0.254"
+[project.optional-dependencies]
+dev = [
+    "black~=22.10.0",
+    "pytest~=7.2.0",
+    "isort~=5.12.0",
+    "pre-commit~=2.20.0",
+    "ruff~=0.0.254",
+]
 
 [tool.ruff]
 ignore = ["E501"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "src/bibx/__init__.py"
+
+[tool.hatch.envs.default]
+features = ["dev"]
+
+[tool.hatch.envs.test]
+dependencies = [
+    "coverage[toml]",
+    "pytest",
+    "pytest-cov",
+]
+[tool.hatch.envs.test.scripts]
+run-coverage = "pytest --cov-config=pyproject.toml --cov=bibx --cov=tests"
+run = "run-coverage --no-cov"
+
+[tool.hatch.envs.docs]
+dependencies = [
+    "mkdocs",
+    "mkdocs-material"
+]
+[tool.hatch.envs.docs.scripts]
+build = "mkdocs build --clean --strict"
+serve = "mkdocs serve --dev-addr localhost:8000"

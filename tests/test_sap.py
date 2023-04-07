@@ -4,7 +4,7 @@ from bibx.algorithms.sap import Sap
 
 
 def create_toy_graph() -> nx.DiGraph:
-    """
+    r"""
     Creates a toy graph with known sap.
 
     The toy graph has the following shape:
