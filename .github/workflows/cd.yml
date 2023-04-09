@@ -32,4 +32,4 @@ jobs:
           HATCH_INDEX_AUTH: ${{ secrets.PYPI_PASSWORD }}
         run: |
           hatch build
-          hatch publish
+          hatch publish --no-prompt
