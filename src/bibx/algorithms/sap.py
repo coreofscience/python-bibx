@@ -1,7 +1,10 @@
+import dataclasses
 import logging
 from typing import List, Tuple
 
 import networkx as nx
+
+from bibx import Article, Collection
 
 YEAR = "year"
 LEAF = "leaf"
@@ -201,6 +204,57 @@ class Sap:
         ]
         return graph.subgraph(nodes)
 
+    @staticmethod
+    def create_graph(collection: Collection) -> nx.DiGraph:
+        """
+        Creates a `networkx.DiGraph` from a `Collection`.
+
+        It uses the article label as a key and adds all the properties of the article to
+        the graph.
+
+        :param collection: a `bibx.Collection` instance.
+        :return: a `networkx.DiGraph` instance.
+        """
+        g = nx.DiGraph()
+        g.add_edges_from((u.key, v.key) for u, v in collection.citation_pairs)
+        for article in collection.articles:
+            for reference in article.references:
+                _add_article_info(g, reference)
+        for article in collection.articles:
+            _add_article_info(g, article)
+        g.remove_edges_from(nx.selfloop_edges(g))
+        return g
+
+    @staticmethod
+    def clean_graph(g: nx.DiGraph) -> nx.DiGraph:
+        """
+        Clean a graph to make it ready for the sap algorithm.
+
+        :param g: graph with unnecessary nodes
+        :return: cleaned up giant component
+        """
+        # Extract the giant component of the graph
+        giant_component_nodes = max(nx.weakly_connected_components(g), key=len)
+        giant: nx.DiGraph = g.subgraph(giant_component_nodes).copy()
+
+        # Remove nodes that cite one element and are never cited themselves
+        giant.remove_nodes_from(
+            [
+                n
+                for n in giant
+                if giant.in_degree(n) == 1 and giant.out_degree(n) == 0  # noqa  # noqa
+            ]
+        )
+
+        # Break loops
+        loops = [
+            loop for loop in nx.strongly_connected_components(giant) if len(loop) > 1
+        ]
+        for loop in loops:
+            giant.remove_edges_from([(u, v) for u in loop for v in loop])
+
+        return giant
+
     def tree(self, graph: nx.DiGraph, clear: bool = False) -> nx.DiGraph:
         """
         Computes the whole tree.
@@ -213,3 +267,13 @@ class Sap:
         if clear:
             graph = self._clear(graph)
         return graph
+
+
+def _add_article_info(g: nx.DiGraph, article: Article):
+    for key, val in dataclasses.asdict(article).items():
+        if key in ("sources", "references") or key.startswith("_"):
+            continue
+        try:
+            g.nodes[article.key][key] = val
+        except KeyError:
+            g.add_node(article.key, **{key: val})
