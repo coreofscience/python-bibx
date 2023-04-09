@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from bibx.entities.collection import Collection
+from bibx._entities.collection import Collection
 
 
 class CollectionBuilder(Protocol):

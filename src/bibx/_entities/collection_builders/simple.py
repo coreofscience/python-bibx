@@ -1,8 +1,8 @@
 from typing import List
 
-from bibx.entities.article import Article
-from bibx.entities.collection import Collection
-from bibx.entities.collection_builders.base import CollectionBuilder
+from bibx._entities.article import Article
+from bibx._entities.collection import Collection
+from bibx._entities.collection_builders.base import CollectionBuilder
 
 
 class SimpleCollectionBuilder(CollectionBuilder):

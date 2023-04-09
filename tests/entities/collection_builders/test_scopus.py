@@ -1,6 +1,6 @@
 import io
 
-from bibx.entities.collection_builders.scopus import ScopusCollectionBuilder
+from bibx._entities.collection_builders.scopus import ScopusCollectionBuilder
 
 
 def test_scopus_works():

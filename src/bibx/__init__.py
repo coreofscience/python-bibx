@@ -1,9 +1,9 @@
 from typing import TextIO
 
-from bibx.entities.article import Article
-from bibx.entities.collection import Collection
-from bibx.entities.collection_builders.isi import IsiCollectionBuilder
-from bibx.entities.collection_builders.scopus import ScopusCollectionBuilder
+from bibx._entities.article import Article
+from bibx._entities.collection import Collection
+from bibx._entities.collection_builders.isi import IsiCollectionBuilder
+from bibx._entities.collection_builders.scopus import ScopusCollectionBuilder
 
 __all__ = ["Article", "Collection", "read_scopus", "read_wos"]
 

@@ -2,7 +2,7 @@ import logging
 from dataclasses import dataclass
 from typing import Iterable, List, Tuple
 
-from bibx.entities.article import Article
+from bibx._entities.article import Article
 
 logger = logging.getLogger(__name__)
 

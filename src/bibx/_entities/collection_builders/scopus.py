@@ -5,9 +5,9 @@ from typing import Iterable, Optional, TextIO
 
 import bibtexparser
 
-from bibx.entities.article import Article
-from bibx.entities.collection import Collection
-from bibx.entities.collection_builders.base import CollectionBuilder
+from bibx._entities.article import Article
+from bibx._entities.collection import Collection
+from bibx._entities.collection_builders.base import CollectionBuilder
 from bibx.exceptions import MissingCriticalInformation
 
 
