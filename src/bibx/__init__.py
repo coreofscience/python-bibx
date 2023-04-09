@@ -1,8 +1,11 @@
 from typing import TextIO
 
+from bibx.entities.article import Article
 from bibx.entities.collection import Collection
 from bibx.entities.collection_builders.isi import IsiCollectionBuilder
 from bibx.entities.collection_builders.scopus import ScopusCollectionBuilder
+
+__all__ = ["Article", "Collection", "read_scopus", "read_wos"]
 
 __version__ = "0.0.1"
 

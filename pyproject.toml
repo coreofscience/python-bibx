@@ -53,7 +53,7 @@ run = "run-coverage --no-cov"
 [tool.hatch.envs.docs]
 dependencies = [
     "mkdocs",
-    "mkdocs-material"
+    "mkdocs-material",
 ]
 [tool.hatch.envs.docs.scripts]
 build = "mkdocs build --clean --strict"

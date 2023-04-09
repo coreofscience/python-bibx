@@ -35,6 +35,15 @@ class Sap:
         min_leaf_connections: int = 3,
         max_leaf_age: int = 7,
     ):
+        """
+        Create a Sap instance with the given parameters.
+
+        :param max_roots: maximum number of roots on the tree
+        :param max_leaves: maximum number of leaves on the tree
+        :param max_trunk: maximum number of trunk nodes in the tree
+        :param min_leaf_connections: minimum number of connections between leaves and roots
+        :param max_leaf_age: maximum age for a leaf
+        """
         self.max_roots = max_roots
         self.max_leaves = max_leaves
         self.max_trunk = max_trunk

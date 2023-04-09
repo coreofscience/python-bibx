@@ -1,2 +1,9 @@
-site_name: bibx
+site_name: Python bibx
+
 theme: material
+
+plugins:
+  - search
+
+nav:
+  - index.md
