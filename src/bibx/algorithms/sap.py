@@ -1,8 +1,9 @@
 import dataclasses
 import logging
-from typing import List, Tuple
+from typing import List, Set, Tuple
 
 import networkx as nx
+from networkx.algorithms.community.louvain import louvain_communities
 
 from bibx import Article, Collection
 
@@ -10,6 +11,7 @@ YEAR = "year"
 LEAF = "leaf"
 ROOT = "root"
 TRUNK = "trunk"
+BRANCH = "branch"
 SAP = "_sap"
 LEAF_CONNECTIONS = "_leaf_connections"
 ELABORATE_SAP = "_elaborate_sap"
@@ -34,6 +36,7 @@ class Sap:
         max_trunk: int = 20,
         min_leaf_connections: int = 3,
         max_leaf_age: int = 7,
+        max_branch_size: int = 15,
     ):
         """
         Create a Sap instance with the given parameters.
@@ -49,6 +52,7 @@ class Sap:
         self.max_trunk = max_trunk
         self.min_leaf_connections = min_leaf_connections
         self.max_leaf_age = max_leaf_age
+        self.max_branch_size = max_branch_size
 
     def _compute_root(self, graph: nx.DiGraph) -> nx.DiGraph:
         """
@@ -199,6 +203,22 @@ class Sap:
             g.nodes[node][TRUNK] = sap
         return g
 
+    def _compute_branches(self, graph: nx.DiGraph) -> nx.DiGraph:
+        """
+        Tags leaves.
+        """
+        g = graph.copy()
+        undirected = g.to_undirected()
+        communities: List[Set] = louvain_communities(undirected)
+        branches = list(sorted(communities, key=len))[:3]
+        nx.set_node_attributes(g, 0, BRANCH)
+        for i, branch in enumerate(branches, start=1):
+            potential_branch = [(n, g.nodes[n][YEAR]) for n in branch]
+            potential_branch = _limit(potential_branch, self.max_branch_size)
+            for node, _ in potential_branch:
+                g.nodes[node][BRANCH] = i
+        return g
+
     @staticmethod
     def _clear(graph: nx.DiGraph) -> nx.DiGraph:
         """
@@ -273,6 +293,7 @@ class Sap:
         graph = self._compute_leaves(graph)
         graph = self._compute_sap(graph)
         graph = self._compute_trunk(graph)
+        graph = self._compute_branches(graph)
         if clear:
             graph = self._clear(graph)
         return graph
