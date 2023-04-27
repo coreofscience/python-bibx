@@ -65,7 +65,7 @@ class Sap:
         ]
         sorted_roots = _limit(valid_roots, self.max_roots)
         nx.set_node_attributes(g, 0, ROOT)
-        for (node, degree) in sorted_roots:
+        for node, degree in sorted_roots:
             g.nodes[node][ROOT] = degree
         return g
 
@@ -205,7 +205,7 @@ class Sap:
 
     def _compute_branches(self, graph: nx.DiGraph) -> nx.DiGraph:
         """
-        Tags leaves.
+        Tags branches.
         """
         g = graph.copy()
         undirected = g.to_undirected()
@@ -213,7 +213,11 @@ class Sap:
         branches = list(sorted(communities, key=len))[:3]
         nx.set_node_attributes(g, 0, BRANCH)
         for i, branch in enumerate(branches, start=1):
-            potential_branch = [(n, g.nodes[n][YEAR]) for n in branch]
+            potential_branch = [
+                (n, g.nodes[n][YEAR])
+                for n in branch
+                if g.nodes[n][ROOT] == 0 and g.nodes[n][TRUNK] == 0
+            ]
             potential_branch = _limit(potential_branch, self.max_branch_size)
             for node, _ in potential_branch:
                 g.nodes[node][BRANCH] = i
