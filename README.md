@@ -15,8 +15,7 @@ A python library with bibliographic and biblio-metric tools.
 Here's how to apply the sap algorithm:
 
 ```python
-from bibx import read_scopus
-from bibx.algorithms.sap import Sap
+from bibx import read_scopus, Sap
 
 with open('./docs/examples/scopus.bib') as f:
     c = read_scopus(f)
