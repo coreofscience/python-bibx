@@ -29,3 +29,12 @@ class MissingCriticalInformation(BibXError, ValueError):
 
     def __init__(self):
         super().__init__("Article is missing some critical information")
+
+
+class InvalidScopusFile(BibXError, ValueError):
+    """
+    Raised when we find an invalid line on an scopus RIS file.
+    """
+
+    def __init__(self):
+        super().__init__("The file contains an invalid RIS line")
