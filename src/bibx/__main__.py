@@ -1,6 +1,6 @@
 import networkx as nx
 
-from bibx import read_scopus, read_wos
+from bibx import read_scopus_bib, read_wos
 from bibx.algorithms.sap import Sap
 
 
@@ -23,7 +23,7 @@ def create_real_graph() -> nx.DiGraph:
     with open("./docs/examples/bit-pattern-savedrecs.txt") as f:
         isi_collection = read_wos(f)
     with open("./docs/examples/scopus.bib") as f:
-        scopus_collection = read_scopus(f)
+        scopus_collection = read_scopus_bib(f)
     merged_collection = scopus_collection.merge(isi_collection)
     g = Sap.create_graph(merged_collection)
     g = Sap.clean_graph(g)

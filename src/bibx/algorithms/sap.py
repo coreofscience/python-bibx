@@ -1,6 +1,6 @@
 import dataclasses
 import logging
-from typing import List, Set, Tuple
+from typing import Any, List, Set, Tuple, cast
 
 import networkx as nx
 from networkx.algorithms.community.louvain import louvain_communities
@@ -21,11 +21,21 @@ RAW_SAP = "_raw_sap"
 logger = logging.getLogger(__name__)
 
 
-def _limit(attribute: List[Tuple[str, int]], _max: int):
+def _limit(attribute: List[Tuple[Any, int]], _max: int):
     if _max is not None:
         sorted_attribute = sorted(attribute, key=lambda x: x[1], reverse=True)
         attribute = sorted_attribute[:_max]
     return attribute
+
+
+def _add_article_info(g: nx.DiGraph, article: Article):
+    for key, val in dataclasses.asdict(article).items():
+        if key in ("sources", "references") or key.startswith("_"):
+            continue
+        try:
+            g.nodes[article.key][key] = val
+        except KeyError:
+            g.add_node(article.key, **{key: val})
 
 
 class Sap:
@@ -54,14 +64,81 @@ class Sap:
         self.max_leaf_age = max_leaf_age
         self.max_branch_size = max_branch_size
 
+    @staticmethod
+    def create_graph(collection: Collection) -> nx.DiGraph:
+        """
+        Creates a `networkx.DiGraph` from a `Collection`.
+
+        It uses the article label as a key and adds all the properties of the article to
+        the graph.
+
+        :param collection: a `bibx.Collection` instance.
+        :return: a `networkx.DiGraph` instance.
+        """
+        g = nx.DiGraph()
+        g.add_edges_from((u.key, v.key) for u, v in collection.citation_pairs)
+        for article in collection.articles:
+            for reference in article.references:
+                _add_article_info(g, reference)
+        for article in collection.articles:
+            _add_article_info(g, article)
+        g.remove_edges_from(nx.selfloop_edges(g))
+        return g
+
+    @staticmethod
+    def clean_graph(g: nx.DiGraph) -> nx.DiGraph:
+        """
+        Clean a graph to make it ready for the sap algorithm.
+
+        :param g: graph with unnecessary nodes
+        :return: cleaned up giant component
+        """
+        # Extract the giant component of the graph
+        giant_component_nodes = max(nx.weakly_connected_components(g), key=len)
+        giant: nx.DiGraph = g.subgraph(giant_component_nodes).copy()
+
+        # Remove nodes that cite one element and are never cited themselves
+        giant.remove_nodes_from(
+            [
+                n
+                for n in giant
+                if giant.in_degree(n) == 1 and giant.out_degree(n) == 0  # noqa  # noqa
+            ]
+        )
+
+        # Break loops
+        loops = [
+            loop for loop in nx.strongly_connected_components(giant) if len(loop) > 1
+        ]
+        for loop in loops:
+            giant.remove_edges_from([(u, v) for u in loop for v in loop])
+
+        return giant
+
+    def tree(self, graph: nx.DiGraph, clear: bool = False) -> nx.DiGraph:
+        """
+        Computes the whole tree.
+        """
+        graph = cast(nx.DiGraph, graph.copy())
+        graph = self._compute_root(graph)
+        graph = self._compute_leaves(graph)
+        graph = self._compute_sap(graph)
+        graph = self._compute_trunk(graph)
+        graph = self._compute_branches(graph)
+        if clear:
+            graph = self._clear(graph)
+        return graph
+
     def _compute_root(self, graph: nx.DiGraph) -> nx.DiGraph:
         """
         Takes in a connected graph and returns it labeled with a `root` property.
         :return: Labeled graph with the root property.
         """
-        g = graph.copy()
+        g = cast(nx.DiGraph, graph.copy())
         valid_roots = [
-            (n, g.in_degree(n)) for n in g.nodes if g.out_degree(n) == 0  # noqa
+            (n, cast(int, g.in_degree(n)))
+            for n in g.nodes
+            if g.out_degree(n) == 0  # noqa
         ]
         sorted_roots = _limit(valid_roots, self.max_roots)
         nx.set_node_attributes(g, 0, ROOT)
@@ -75,9 +152,9 @@ class Sap:
         :param graph: Connected and filtered graph to work with.
         :return: Labeled graph with the leaf property.
         """
-        g = graph.copy()
+        g = cast(nx.DiGraph, graph.copy())
         try:
-            roots = [n for n, d in g.nodes(data=True) if d[ROOT] > 0]
+            roots = [n for n, d in g.nodes.items() if d[ROOT] > 0]
         except AttributeError:
             raise TypeError("It's necessary to have some roots")
         if not roots:
@@ -137,10 +214,10 @@ class Sap:
         """
         Computes the sap of each node.
         """
-        g = graph.copy()
+        g = cast(nx.DiGraph, graph.copy())
         try:
-            valid_root = [n for n, d in g.nodes(data=True) if d[ROOT] > 0]
-            valid_leaves = [n for n, d in g.nodes(data=True) if d[LEAF] > 0]
+            valid_root = [n for n, d in g.nodes.items() if d[ROOT] > 0]
+            valid_leaves = [n for n, d in g.nodes.items() if d[LEAF] > 0]
         except AttributeError:
             raise TypeError("The graph needs to have a 'root' and a 'leaf' attribute")
         if not valid_root or not valid_leaves:
@@ -181,14 +258,12 @@ class Sap:
         """
         Tags leaves.
         """
-        g = graph.copy()
+        g = cast(nx.DiGraph, graph.copy())
         try:
             potential_trunk = [
-                (n, g.nodes[n][SAP])
-                for n in g.nodes
-                if g.nodes[n][ROOT] == 0
-                and g.nodes[n][LEAF] == 0
-                and g.nodes[n][SAP] > 0
+                (n, d[SAP])
+                for n, d in g.nodes.items()
+                if d[ROOT] == 0 and d[LEAF] == 0 and d[SAP] > 0
             ]
         except AttributeError:
             raise TypeError(
@@ -207,7 +282,7 @@ class Sap:
         """
         Tags branches.
         """
-        g = graph.copy()
+        g = cast(nx.DiGraph, graph.copy())
         undirected = g.to_undirected()
         communities: List[Set] = louvain_communities(undirected)
         branches = list(sorted(communities, key=len))[:3]
@@ -236,78 +311,3 @@ class Sap:
             and graph.nodes[n][LEAF] > 0
         ]
         return graph.subgraph(nodes)
-
-    @staticmethod
-    def create_graph(collection: Collection) -> nx.DiGraph:
-        """
-        Creates a `networkx.DiGraph` from a `Collection`.
-
-        It uses the article label as a key and adds all the properties of the article to
-        the graph.
-
-        :param collection: a `bibx.Collection` instance.
-        :return: a `networkx.DiGraph` instance.
-        """
-        g = nx.DiGraph()
-        g.add_edges_from((u.key, v.key) for u, v in collection.citation_pairs)
-        for article in collection.articles:
-            for reference in article.references:
-                _add_article_info(g, reference)
-        for article in collection.articles:
-            _add_article_info(g, article)
-        g.remove_edges_from(nx.selfloop_edges(g))
-        return g
-
-    @staticmethod
-    def clean_graph(g: nx.DiGraph) -> nx.DiGraph:
-        """
-        Clean a graph to make it ready for the sap algorithm.
-
-        :param g: graph with unnecessary nodes
-        :return: cleaned up giant component
-        """
-        # Extract the giant component of the graph
-        giant_component_nodes = max(nx.weakly_connected_components(g), key=len)
-        giant: nx.DiGraph = g.subgraph(giant_component_nodes).copy()
-
-        # Remove nodes that cite one element and are never cited themselves
-        giant.remove_nodes_from(
-            [
-                n
-                for n in giant
-                if giant.in_degree(n) == 1 and giant.out_degree(n) == 0  # noqa  # noqa
-            ]
-        )
-
-        # Break loops
-        loops = [
-            loop for loop in nx.strongly_connected_components(giant) if len(loop) > 1
-        ]
-        for loop in loops:
-            giant.remove_edges_from([(u, v) for u in loop for v in loop])
-
-        return giant
-
-    def tree(self, graph: nx.DiGraph, clear: bool = False) -> nx.DiGraph:
-        """
-        Computes the whole tree.
-        """
-        graph = graph.copy()
-        graph = self._compute_root(graph)
-        graph = self._compute_leaves(graph)
-        graph = self._compute_sap(graph)
-        graph = self._compute_trunk(graph)
-        graph = self._compute_branches(graph)
-        if clear:
-            graph = self._clear(graph)
-        return graph
-
-
-def _add_article_info(g: nx.DiGraph, article: Article):
-    for key, val in dataclasses.asdict(article).items():
-        if key in ("sources", "references") or key.startswith("_"):
-            continue
-        try:
-            g.nodes[article.key][key] = val
-        except KeyError:
-            g.add_node(article.key, **{key: val})

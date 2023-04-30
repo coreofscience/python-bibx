@@ -54,7 +54,7 @@ class IsiField:
         return self.parser(value)
 
 
-class IsiCollectionBuilder(CollectionBuilder):
+class WosCollectionBuilder(CollectionBuilder):
     ISI_LINE_PATTERN = re.compile(
         r"^(null|.)?((?P<field>[A-Z0-9]{2})|  )( (?P<value>.*))?$"
     )
@@ -311,7 +311,7 @@ class IsiCollectionBuilder(CollectionBuilder):
             references=list(
                 cls._get_articles_from_references(processed.get("references"))
             ),
-            keywords=processed.get("keywords"),
+            keywords=processed.get("keywords", []),
             extra=processed,
             sources={article_as_str},
         )
@@ -341,7 +341,7 @@ class IsiCollectionBuilder(CollectionBuilder):
     def _parse_all(article_data: Dict[str, List[str]]) -> Mapping[str, Any]:
         processed_data = {}
         for key, values in article_data.items():
-            parsed_values_dict = IsiCollectionBuilder._parse(key, values)
+            parsed_values_dict = WosCollectionBuilder._parse(key, values)
             processed_data.update(parsed_values_dict)
         return processed_data
 
@@ -350,8 +350,8 @@ class IsiCollectionBuilder(CollectionBuilder):
         if key in {"FN", "VR", "ER"}:
             return {}
 
-        if key in IsiCollectionBuilder.FIELDS:
-            field = IsiCollectionBuilder.FIELDS[key]
+        if key in WosCollectionBuilder.FIELDS:
+            field = WosCollectionBuilder.FIELDS[key]
             parsed_value = field.parse(value)
             return {new_key: parsed_value for new_key in [field.key, *field.aliases]}
 

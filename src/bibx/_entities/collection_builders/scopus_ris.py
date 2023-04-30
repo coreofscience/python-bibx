@@ -165,7 +165,7 @@ class ScopusRisCollectionBuilder(CollectionBuilder):
             issue=_joined(data.get("IS")),
             page=_joined(data.get("SP")),
             doi=_joined(data.get("DO")),
-            keywords=data.get("KW"),
+            keywords=data.get("KW", []),
             references=cls.parse_references(data.get("N1:References", [])),
             sources={"scopus"},
             extra=data,
