@@ -11,7 +11,7 @@ from bibx._entities.collection_builders.base import CollectionBuilder
 from bibx.exceptions import MissingCriticalInformation
 
 
-class ScopusCollectionBuilder(CollectionBuilder):
+class ScopusBibCollectionBuilder(CollectionBuilder):
     def __init__(self, *scopus_files: TextIO):
         self._files = scopus_files
         for file in self._files:

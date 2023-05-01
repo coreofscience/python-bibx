@@ -1,6 +1,6 @@
 import io
 
-from bibx._entities.collection_builders.scopus import ScopusCollectionBuilder
+from bibx import read_scopus_bib
 
 
 def test_scopus_works():
@@ -32,7 +32,7 @@ source={Scopus},
 }
 """
     )
-    data = ScopusCollectionBuilder(file).build()
+    data = read_scopus_bib(file)
     assert len(data.articles) == 1
     (article,) = data.articles
     assert (

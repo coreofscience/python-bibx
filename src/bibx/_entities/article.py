@@ -13,10 +13,10 @@ class Article:
     page: Optional[str] = None
     doi: Optional[str] = None
     _label: Optional[str] = None
-    references: Optional[List["Article"]] = field(default_factory=list)
-    keywords: Optional[List[str]] = field(default_factory=list)
-    sources: Optional[Set[str]] = field(default_factory=set)
-    extra: Optional[Mapping] = field(default_factory=dict)
+    references: List["Article"] = field(default_factory=list)
+    keywords: List[str] = field(default_factory=list)
+    sources: Set[str] = field(default_factory=set)
+    extra: Mapping = field(default_factory=dict)
 
     @property
     def key(self):
