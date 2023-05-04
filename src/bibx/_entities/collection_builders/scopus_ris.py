@@ -45,7 +45,7 @@ class ScopusRisCollectionBuilder(CollectionBuilder):
 
     def _get_articles_from_files(self) -> Iterable[Article]:
         for file in self._files:
-            yield from self.parse_file(file)
+            yield from self._parse_file(file)
 
     @staticmethod
     def _find_volume_info(ref: str) -> Tuple[Dict[str, str], str]:
@@ -90,14 +90,14 @@ class ScopusRisCollectionBuilder(CollectionBuilder):
         return f"DOI {doi}", ref[result.lastindex :]
 
     @classmethod
-    def _scopus_ref_to_isi(cls, scopusref: str) -> Article:
+    def _article_form_reference(cls, scopusref: str) -> Article:
         authors, year, rest = re.split(r"(\(\d{4}\))", scopusref, maxsplit=1)
         first_name, last_name, *_ = authors.split(", ")
         year = year[1:-1]
         journal, rest = rest.split(", ", 1)
         volume_info, rest = cls._find_volume_info(rest)
         doi, _ = cls._find_doi(scopusref)
-        if not year:
+        if not authors or not year:
             raise MissingCriticalInformation()
         return Article(
             authors=[f"{first_name} {last_name.replace(' ', '').replace('.', '')}"],
@@ -111,19 +111,19 @@ class ScopusRisCollectionBuilder(CollectionBuilder):
         )
 
     @classmethod
-    def parse_references(cls, refs: List[str]) -> List[Article]:
+    def _parse_references(cls, refs: List[str]) -> List[Article]:
         if not refs:
             return []
         result = []
         for ref in refs:
             try:
-                result.append(cls._scopus_ref_to_isi(ref))
+                result.append(cls._article_form_reference(ref))
             except (KeyError, IndexError, TypeError, ValueError):
                 logging.debug(f"Ignoring invalid reference {ref}")
         return result
 
     @staticmethod
-    def ris_to_dict(record: str) -> Dict[str, List[str]]:
+    def _ris_to_dict(record: str) -> Dict[str, List[str]]:
         RIS_PATTERN = re.compile(
             r"^(((?P<key>[A-Z0-9]{2}))[ ]{2}-[ ]{1})?(?P<value>(.*))$"
         )
@@ -151,14 +151,15 @@ class ScopusRisCollectionBuilder(CollectionBuilder):
         return dict(parsed)
 
     @classmethod
-    def parse_record(cls, record: str) -> Article:
-        data = cls.ris_to_dict(record)
+    def _parse_record(cls, record: str) -> Article:
+        data = cls._ris_to_dict(record)
         year = _int_or_nothing(data.get("PY", []))
-        if not year:
+        authors = data.get("AU", [])
+        if not authors or not year:
             raise MissingCriticalInformation()
         return Article(
             title=_joined(data.get("TI")),
-            authors=data.get("AU", []),
+            authors=authors,
             year=year,
             journal=_joined(data.get("J2")),
             volume=_joined(data.get("VL")),
@@ -166,17 +167,20 @@ class ScopusRisCollectionBuilder(CollectionBuilder):
             page=_joined(data.get("SP")),
             doi=_joined(data.get("DO")),
             keywords=data.get("KW", []),
-            references=cls.parse_references(data.get("N1:References", [])),
+            references=cls._parse_references(data.get("N1:References", [])),
             sources={"scopus"},
             extra=data,
         )
 
     @classmethod
-    def parse_file(cls, file: TextIO) -> Iterable[Article]:
+    def _parse_file(cls, file: TextIO) -> Iterable[Article]:
         if not _size(file):
             return []
         for item in file.read().split("\n\n"):
             if item.isspace():
                 continue
-            article = cls.parse_record(item.strip())
-            yield article
+            try:
+                article = cls._parse_record(item.strip())
+                yield article
+            except MissingCriticalInformation:
+                logger.info("Missing critical information for record %s", item)

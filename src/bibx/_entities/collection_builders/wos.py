@@ -337,21 +337,21 @@ class WosCollectionBuilder(CollectionBuilder):
             sources={reference},
         )
 
-    @staticmethod
-    def _parse_all(article_data: Dict[str, List[str]]) -> Mapping[str, Any]:
+    @classmethod
+    def _parse_all(cls, article_data: Dict[str, List[str]]) -> Mapping[str, Any]:
         processed_data = {}
         for key, values in article_data.items():
-            parsed_values_dict = WosCollectionBuilder._parse(key, values)
+            parsed_values_dict = cls._parse(key, values)
             processed_data.update(parsed_values_dict)
         return processed_data
 
-    @staticmethod
-    def _parse(key: str, value: List[str]) -> Dict:
+    @classmethod
+    def _parse(cls, key: str, value: List[str]) -> Dict:
         if key in {"FN", "VR", "ER"}:
             return {}
 
-        if key in WosCollectionBuilder.FIELDS:
-            field = WosCollectionBuilder.FIELDS[key]
+        if key in cls.FIELDS:
+            field = cls.FIELDS[key]
             parsed_value = field.parse(value)
             return {new_key: parsed_value for new_key in [field.key, *field.aliases]}
 
