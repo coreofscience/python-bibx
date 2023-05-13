@@ -151,12 +151,10 @@ class ScopusRisCollectionBuilder(CollectionBuilder):
         return dict(parsed)
 
     @classmethod
-    def _parse_record(cls, record: str) -> Article:
+    def _article_from_record(cls, record: str) -> Article:
         data = cls._ris_to_dict(record)
         year = _int_or_nothing(data.get("PY", []))
         authors = data.get("AU", [])
-        if not authors or not year:
-            raise MissingCriticalInformation()
         return Article(
             title=_joined(data.get("TI")),
             authors=authors,
@@ -180,7 +178,7 @@ class ScopusRisCollectionBuilder(CollectionBuilder):
             if item.isspace():
                 continue
             try:
-                article = cls._parse_record(item.strip())
+                article = cls._article_from_record(item.strip())
                 yield article
             except MissingCriticalInformation:
                 logger.info("Missing critical information for record %s", item)

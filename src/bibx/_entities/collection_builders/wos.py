@@ -296,12 +296,9 @@ class WosCollectionBuilder(CollectionBuilder):
 
         processed = cls._parse_all(dict(article_data))
 
-        if not processed.get("year") or not processed.get("authors"):
-            raise MissingCriticalInformation()
-
         return Article(
-            authors=processed["authors"],
-            year=processed["year"],
+            authors=processed.get("authors", []),
+            year=processed.get("year"),
             title=processed.get("title"),
             journal=processed.get("source_abbreviation"),
             volume=processed.get("volume"),

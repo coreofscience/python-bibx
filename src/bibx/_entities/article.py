@@ -4,8 +4,8 @@ from typing import List, Mapping, Optional, Set
 
 @dataclass
 class Article:
-    authors: List[str]
-    year: int
+    authors: List[str] = field(default_factory=list)
+    year: Optional[int] = None
     title: Optional[str] = None
     journal: Optional[str] = None
     volume: Optional[str] = None
@@ -20,7 +20,10 @@ class Article:
 
     @property
     def key(self):
-        author = self.authors[0].split(" ")[0].replace(",", "")
+        if self.authors:
+            author = self.authors[0].split(" ")[0].replace(",", "")
+        else:
+            author = "anonymous"
         year = self.year
         return f"{author}{year}".lower()
 
@@ -29,9 +32,9 @@ class Article:
         if self._label is not None:
             return self._label
         pieces = {
-            "AU": self.authors[0].replace(",", ""),
-            "PY": str(self.year),
-            "J9": str(self.journal),
+            "AU": self.authors[0].replace(",", "") if self.authors else "anonymous",
+            "PY": str(self.year) if self.year else None,
+            "J9": str(self.journal) if self.journal else None,
             "VL": f"V{self.volume}" if self.volume else None,
             "BP": f"P{self.page}" if self.page else None,
             "DI": f"DOI {self.doi}" if self.doi else None,

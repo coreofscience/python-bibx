@@ -16,6 +16,7 @@ dynamic = ["version"]
 dependencies = [
     "bibtexparser~=1.4.0",
     "networkx~=3.0",
+    "typer[all]~=0.9.0",
 ]
 
 [project.optional-dependencies]

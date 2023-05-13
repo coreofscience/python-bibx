@@ -19,7 +19,7 @@ __all__ = [
     "read_any",
 ]
 
-__version__ = "0.0.1a4"
+__version__ = "0.0.1a5"
 
 
 def read_scopus_bib(*files: TextIO) -> Collection:

@@ -185,7 +185,9 @@ class Sap:
 
         if self.max_leaf_age is not None:
             potential_leaves = [
-                (n, c) for n, c in potential_leaves if YEAR in g.nodes[n]
+                (n, c)
+                for n, c in potential_leaves
+                if YEAR in g.nodes[n] and g.nodes[n][YEAR] is not None
             ]
             newest_year = max(
                 g.nodes[n][YEAR] for n, _ in potential_leaves if g.nodes[n][YEAR]
