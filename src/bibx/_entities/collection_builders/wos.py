@@ -352,5 +352,5 @@ class WosCollectionBuilder(CollectionBuilder):
             parsed_value = field.parse(value)
             return {new_key: parsed_value for new_key in [field.key, *field.aliases]}
 
-        logger.info(f"Found an unknown field with key {key} and value {value}")
+        logger.debug(f"Found an unknown field with key {key} and value {value}")
         return {key: _ident(value)}
