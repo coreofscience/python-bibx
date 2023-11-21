@@ -1,6 +1,6 @@
-import logging, datetime
+import datetime, logging
 from dataclasses import dataclass
-from typing import Iterable, List, Tuple, Dict
+from typing import Dict, Iterable, List, Tuple
 
 from bibx._entities.article import Article
 

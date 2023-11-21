@@ -1,7 +1,7 @@
 import unittest
 
-from bibx._entities.collection import Collection
 from bibx._entities.article import Article
+from bibx._entities.collection import Collection
 
 class TestCollection(unittest.TestCase):
     def test_count_by_year(self):
