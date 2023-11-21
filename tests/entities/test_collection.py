@@ -1,10 +1,8 @@
-import unittest
-
 from bibx._entities.article import Article
 from bibx._entities.collection import Collection
 
 
-class TestCollection(unittest.TestCase):
+class TestCollection:
     def test_count_by_year(self):
         articles = [
             Article(
@@ -145,7 +143,3 @@ class TestCollection(unittest.TestCase):
         assert res.get(2021) == 2
         assert res.get(2022) == 1
         assert res.get(2023) == 0
-
-
-if __name__ == "__main__":
-    unittest.main()
