@@ -1,6 +1,6 @@
-import logging
+import logging, datetime
 from dataclasses import dataclass
-from typing import Iterable, List, Tuple
+from typing import Iterable, List, Tuple, Dict
 
 from bibx._entities.article import Article
 
@@ -49,3 +49,25 @@ class Collection:
         merged = self.articles[:]
         merged.extend(a for a in other.articles if a.key not in keys)
         return Collection(merged)
+
+
+    def count_by_year(self) -> Dict[int, int]:
+        """
+        Returns a dictionary where the key is the year of publication and the value is the number of articles
+        published that year. The dictionary starts from the oldest article to the current year consecutively.
+        If a year has no publications the value will be zero.
+
+        :return: a dictionary with the number of articles published each year.
+        """
+        current_year = datetime.date.today().year
+        primary_year = min([article.year for article in self.articles])
+        years = {}
+        for year in range(primary_year, current_year + 1):
+            years[year] = 0
+
+        for article in self.articles:
+            if article.year in years:
+                years[article.year] += 1
+            else:
+                years[article.year] = 1
+        return years
