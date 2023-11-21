@@ -38,19 +38,6 @@ class Collection:
                 else:
                     yield article, reference
 
-    def merge(self, other: "Collection") -> "Collection":
-        """
-        Creates a new collection merging the articles by key.
-
-        :param other: collection to merge to.
-        :return: a new collection object.
-        """
-        keys = {a.key for a in self.articles}
-        merged = self.articles[:]
-        merged.extend(a for a in other.articles if a.key not in keys)
-        return Collection(merged)
-
-
     def count_by_year(self) -> Dict[int, int]:
         """
         Returns a dictionary where the key is the year of publication and the value is the number of articles
@@ -71,3 +58,15 @@ class Collection:
             else:
                 years[article.year] = 1
         return years
+
+    def merge(self, other: "Collection") -> "Collection":
+        """
+        Creates a new collection merging the articles by key.
+
+        :param other: collection to merge to.
+        :return: a new collection object.
+        """
+        keys = {a.key for a in self.articles}
+        merged = self.articles[:]
+        merged.extend(a for a in other.articles if a.key not in keys)
+        return Collection(merged)
