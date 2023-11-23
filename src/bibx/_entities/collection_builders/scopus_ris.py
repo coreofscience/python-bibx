@@ -154,6 +154,7 @@ class ScopusRisCollectionBuilder(CollectionBuilder):
     def _article_from_record(cls, record: str) -> Article:
         data = cls._ris_to_dict(record)
         year = _int_or_nothing(data.get("PY", []))
+        times_cited = _int_or_nothing(data.get("TC"))
         authors = data.get("AU", [])
         return Article(
             title=_joined(data.get("TI")),
@@ -168,6 +169,7 @@ class ScopusRisCollectionBuilder(CollectionBuilder):
             references=cls._parse_references(data.get("N1:References", [])),
             sources={"scopus"},
             extra=data,
+            times_cited=times_cited,
         )
 
     @classmethod
