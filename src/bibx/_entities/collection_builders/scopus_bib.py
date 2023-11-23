@@ -44,6 +44,7 @@ class ScopusBibCollectionBuilder(CollectionBuilder):
             keywords=entry.get("keywords", "").split("; "),
             extra=entry,
             sources={json.dumps(entry)},
+            time_cited=entry.get("time_cited"),
         )
 
     def _articles_from_references(self, references: Optional[str]) -> Iterable[Article]:

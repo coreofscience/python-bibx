@@ -305,6 +305,7 @@ class WosCollectionBuilder(CollectionBuilder):
             issue=processed.get("issue"),
             page=processed.get("beginning_page"),
             doi=processed.get("DOI"),
+            time_cited=processed.get("times_cited"),
             references=list(
                 cls._get_articles_from_references(processed.get("references"))
             ),
@@ -332,6 +333,7 @@ class WosCollectionBuilder(CollectionBuilder):
             doi=processed.get("DOI"),
             extra=processed,
             sources={reference},
+            time_cited=processed.get("times_cited"),
         )
 
     @classmethod

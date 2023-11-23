@@ -13,6 +13,7 @@ class Article:
     page: Optional[str] = None
     doi: Optional[str] = None
     _label: Optional[str] = None
+    time_cited: Optional[int] = None
     references: List["Article"] = field(default_factory=list)
     keywords: List[str] = field(default_factory=list)
     sources: Set[str] = field(default_factory=set)
