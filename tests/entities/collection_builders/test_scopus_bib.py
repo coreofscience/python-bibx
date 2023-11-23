@@ -88,7 +88,7 @@ source={Scopus},
         data.articles[1].title
         == "Analysis of the energy distribution of iron nano-spheres for bit-patterned media"
     )
-    assert data.articles[0].time_cited == 12
-    assert data.articles[1].time_cited == 0
-    assert data.articles[2].time_cited is None
+    assert data.articles[0].times_cited == 12
+    assert data.articles[1].times_cited == 0
+    assert data.articles[2].times_cited is None
     assert len(list(data.citation_pairs)) == 49

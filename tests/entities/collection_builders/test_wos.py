@@ -115,4 +115,4 @@ ER
         == "In situ grazing incidence small-angle X-ray scattering study of solvent vapor annealing in lamellae-forming block copolymer thin films: Trade-off of defects in deswelling"
     )
     assert len(list(data.citation_pairs)) == 37
-    assert article.time_cited == 0
+    assert article.times_cited == 0
