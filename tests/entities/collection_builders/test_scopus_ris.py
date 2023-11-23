@@ -44,3 +44,4 @@ ER  -
     )
     assert article.year == 2020
     assert len(list(data.citation_pairs)) == 10
+    assert article.time_cited is None
