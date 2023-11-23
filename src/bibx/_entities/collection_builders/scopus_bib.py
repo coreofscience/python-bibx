@@ -31,6 +31,12 @@ class ScopusBibCollectionBuilder(CollectionBuilder):
     def _article_from_entry(self, entry: dict) -> Article:
         if "author" not in entry or "year" not in entry:
             raise MissingCriticalInformation()
+        if "note" in entry:
+            time_cited = re.search(r"cited By (\d+)", entry["note"], re.IGNORECASE)
+            if time_cited:
+                time_cited = int(time_cited.groups()[0])
+        else:
+            time_cited = None
         return Article(
             authors=entry["author"].split(" and "),
             year=int(entry["year"]),
@@ -44,7 +50,7 @@ class ScopusBibCollectionBuilder(CollectionBuilder):
             keywords=entry.get("keywords", "").split("; "),
             extra=entry,
             sources={json.dumps(entry)},
-            time_cited=entry.get("time_cited"),
+            time_cited=time_cited,
         )
 
     def _articles_from_references(self, references: Optional[str]) -> Iterable[Article]:
