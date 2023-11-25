@@ -2,7 +2,7 @@ from bibx._entities.article import Article
 from bibx._entities.collection import Collection
 
 
-def test_count_by_year():
+def test_published_by_year():
     articles = [
         Article(
             authors=["A"],
@@ -133,7 +133,7 @@ def test_count_by_year():
     ]
     collection = Collection(articles=articles)
 
-    res = collection.count_by_year()
+    res = collection.published_by_year()
     assert res.get(2000) == 2
     assert res.get(2001) == 0
     assert res.get(2002) == 0

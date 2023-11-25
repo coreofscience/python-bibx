@@ -39,7 +39,7 @@ class Collection:
                 else:
                     yield article, reference
 
-    def count_by_year(self) -> Dict[int, int]:
+    def published_by_year(self) -> Dict[int, int]:
         """
         Returns a dictionary where the key is the year of publication and the value is the number of articles
         published that year. The dictionary starts from the oldest article to the current year consecutively.
@@ -54,6 +54,8 @@ class Collection:
             years[year] = 0
 
         for article in self.articles:
+            if article.year is None:
+                continue
             if article.year in years:
                 years[article.year] += 1
             else:
