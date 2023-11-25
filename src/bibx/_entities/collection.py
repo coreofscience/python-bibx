@@ -39,6 +39,15 @@ class Collection:
                 else:
                     yield article, reference
 
+    @property
+    def primary_year(self) -> int:
+        """
+        Returns the year of the first article in the collection.
+
+        :return: an integer.
+        """
+        return min([article.year for article in self.articles])
+
     def published_by_year(self) -> Dict[int, int]:
         """
         Returns a dictionary where the key is the year of publication and the value is the number of articles
@@ -48,9 +57,8 @@ class Collection:
         :return: a dictionary with the number of articles published each year.
         """
         current_year = datetime.date.today().year
-        primary_year = min([article.year for article in self.articles])
         years = {}
-        for year in range(primary_year, current_year + 1):
+        for year in range(self.primary_year, current_year + 1):
             years[year] = 0
 
         for article in self.articles:
@@ -73,3 +81,26 @@ class Collection:
         merged = self.articles[:]
         merged.extend(a for a in other.articles if a.key not in keys)
         return Collection(merged)
+
+    def cited_by_year(self) -> Dict[int, int]:
+        """
+        Returns a dictionary where the key is the year of publication and the value is the number of
+        citations in that year. The dictionary starts from the oldest article to the current year consecutively.
+        If a year has no citations the value will be zero.
+
+        :return: a dictionary with the number of citations each year.
+        """
+        current_year = datetime.date.today().year
+        cited_items_per_year = {}
+        for year in range(self.primary_year, current_year + 1):
+            cited_items_per_year[year] = 0
+
+        for article in self.articles:
+            if article.times_cited is None:
+                continue
+            if article.year in cited_items_per_year:
+                cited_items_per_year[article.year] += article.times_cited
+            else:
+                cited_items_per_year[article.year] = article.times_cited
+
+        return cited_items_per_year
