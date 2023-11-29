@@ -46,7 +46,9 @@ class Collection:
 
         :return: an integer.
         """
-        return min([article.year for article in self.articles])
+        return min(
+            [article.year for article in self.articles if article.year is not None]
+        )
 
     def published_by_year(self) -> Dict[int, int]:
         """

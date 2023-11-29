@@ -136,6 +136,33 @@ articles = [
         extra={},
         _label=None,
     ),
+    Article(
+        authors=["I"],
+        year=None,
+        title="Ii",
+        journal="Aii",
+        volume="9",
+        page="18",
+        doi="19",
+        references=[],
+        keywords=[],
+        sources=[],
+        extra={},
+        _label=None,
+    ),
+    Article(
+        authors=["I"],
+        title="Ii",
+        journal="Aii",
+        volume="9",
+        page="18",
+        doi="19",
+        references=[],
+        keywords=[],
+        sources=[],
+        extra={},
+        _label=None,
+    ),
 ]
 
 
@@ -165,3 +192,10 @@ def test_cited_by_year():
     assert res.get(2021) == 12
     assert res.get(2022) == 2
     assert res.get(2023) == 0
+
+
+def test_primary_year():
+    collection = Collection(articles=articles)
+
+    res = collection.primary_year
+    assert res == 2000
