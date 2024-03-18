@@ -1,0 +1,3 @@
+from _typeshed import Incomplete
+
+def load(bibtex_file, parser: Incomplete | None = None): ...

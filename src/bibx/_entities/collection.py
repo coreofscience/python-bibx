@@ -98,7 +98,7 @@ class Collection:
             cited_items_per_year[year] = 0
 
         for article in self.articles:
-            if article.times_cited is None:
+            if article.times_cited is None or article.year is None:
                 continue
             if article.year in cited_items_per_year:
                 cited_items_per_year[article.year] += article.times_cited

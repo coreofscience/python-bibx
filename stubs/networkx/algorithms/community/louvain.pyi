@@ -1,0 +1,3 @@
+from networkx import Graph
+
+def louvain_communities(g: Graph): ...
