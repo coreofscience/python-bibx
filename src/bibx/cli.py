@@ -1,10 +1,13 @@
+from collections.abc import Callable
 from enum import Enum
+from typing import List, TextIO
 
 import networkx as nx
 import typer
 from rich import print
 
-from bibx import read_any, read_scopus_bib, read_scopus_ris, read_wos
+from bibx import Collection, read_any, read_scopus_bib, read_scopus_ris, read_wos
+from bibx.algorithms.preprocess import Preprocess
 from bibx.algorithms.sap import Sap
 
 app = typer.Typer()
@@ -64,6 +67,34 @@ def sap(filename: str):
     graph = s.clean_graph(graph)
     graph = s.tree(graph)
     print(graph)
+
+
+def _read_many(
+    reader: Callable[[TextIO], Collection],
+    *filenames: str,
+) -> Collection:
+    first, *rest = filenames
+    with open(first) as f:
+        collection = reader(f)
+    for filename in rest:
+        with open(filename) as f:
+            collection = collection.merge(reader(f))
+    return collection
+
+
+@app.command()
+def preprocess(
+    output: str,
+    wos: List[str] = typer.Option(help="WoS files to pre process"),
+    scopus: List[str] = typer.Option(help="scopus files to preprocess"),
+):
+    """
+    Preprocesses a collection.
+    """
+    wos_collection = _read_many(read_wos, *wos)
+    scopus_collection = _read_many(read_scopus_ris, *scopus)
+    p = Preprocess(wos_collection, scopus_collection)
+    p.create_workbook(output)
 
 
 if __name__ == "__main__":

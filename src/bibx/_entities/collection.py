@@ -12,6 +12,18 @@ logger = logging.getLogger(__name__)
 class Collection:
     articles: List[Article]
 
+    def merge(self, other: "Collection") -> "Collection":
+        """
+        Creates a new collection merging the articles by key.
+
+        :param other: collection to merge to.
+        :return: a new collection object.
+        """
+        keys = {a.key for a in self.articles}
+        merged = self.articles[:]
+        merged.extend(a for a in other.articles if a.key not in keys)
+        return Collection(merged)
+
     @property
     def all_articles(self) -> Iterable[Article]:
         """
@@ -40,7 +52,7 @@ class Collection:
                     yield article, reference
 
     @property
-    def primary_year(self) -> int:
+    def _first_year(self) -> int:
         """
         Returns the year of the first article in the collection.
 
@@ -60,7 +72,7 @@ class Collection:
         """
         current_year = datetime.date.today().year
         years = {}
-        for year in range(self.primary_year, current_year + 1):
+        for year in range(self._first_year, current_year + 1):
             years[year] = 0
 
         for article in self.articles:
@@ -72,18 +84,6 @@ class Collection:
                 years[article.year] = 1
         return years
 
-    def merge(self, other: "Collection") -> "Collection":
-        """
-        Creates a new collection merging the articles by key.
-
-        :param other: collection to merge to.
-        :return: a new collection object.
-        """
-        keys = {a.key for a in self.articles}
-        merged = self.articles[:]
-        merged.extend(a for a in other.articles if a.key not in keys)
-        return Collection(merged)
-
     def cited_by_year(self) -> Dict[int, int]:
         """
         Returns a dictionary where the key is the year of publication and the value is the number of
@@ -94,7 +94,7 @@ class Collection:
         """
         current_year = datetime.date.today().year
         cited_items_per_year = {}
-        for year in range(self.primary_year, current_year + 1):
+        for year in range(self._first_year, current_year + 1):
             cited_items_per_year[year] = 0
 
         for article in self.articles:
