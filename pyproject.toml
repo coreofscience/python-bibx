@@ -17,6 +17,7 @@ dependencies = [
     "bibtexparser~=1.4.0",
     "networkx~=3.0",
     "typer[all]~=0.9.0",
+    "xlsxwriter~=3.2.0",
 ]
 
 [project.optional-dependencies]
@@ -27,8 +28,12 @@ dev = [
     "mypy~=1.9.0",
 ]
 
+[project.scripts]
+bibx = "bibx.cli:app"
+
 [tool.ruff.lint]
-select = ["I"]
+select = ["I", "E", "F", "W"]
+ignore = ["E501"]
 
 [tool.mypy]
 mypy_path = "./stubs/"
