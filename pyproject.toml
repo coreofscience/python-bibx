@@ -21,15 +21,17 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "black~=22.10.0",
     "pytest~=7.2.0",
-    "isort~=5.12.0",
     "pre-commit~=2.20.0",
-    "ruff~=0.0.254",
+    "ruff~=0.3.3",
+    "mypy~=1.9.0",
 ]
 
-[tool.ruff]
-ignore = ["E501"]
+[tool.ruff.lint]
+select = ["I"]
+
+[tool.mypy]
+mypy_path = "./stubs/"
 
 [build-system]
 requires = ["hatchling"]
@@ -40,17 +42,3 @@ path = "src/bibx/__init__.py"
 
 [tool.hatch.envs.default]
 features = ["dev"]
-
-[tool.hatch.envs.test]
-dependencies = [
-    "coverage[toml]",
-    "pytest",
-    "pytest-cov",
-]
-[tool.hatch.envs.test.scripts]
-run-coverage = "pytest --cov-config=pyproject.toml --cov=bibx --cov=tests"
-run = "run-coverage --no-cov"
-
-[tool.hatch.envs.docs.scripts]
-build = "mkdocs build --clean --strict"
-serve = "mkdocs serve --dev-addr localhost:8000"

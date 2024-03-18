@@ -95,7 +95,7 @@ class Sap:
         """
         # Extract the giant component of the graph
         giant_component_nodes = max(nx.weakly_connected_components(g), key=len)
-        giant: nx.DiGraph = g.subgraph(giant_component_nodes).copy()
+        giant: nx.DiGraph = cast(nx.DiGraph, g.subgraph(giant_component_nodes).copy())
 
         # Remove nodes that cite one element and are never cited themselves
         giant.remove_nodes_from(
@@ -312,4 +312,4 @@ class Sap:
             and graph.nodes[n][TRUNK] > 0
             and graph.nodes[n][LEAF] > 0
         ]
-        return graph.subgraph(nodes)
+        return cast(nx.DiGraph, graph.subgraph(nodes))

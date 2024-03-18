@@ -22,9 +22,13 @@ jobs:
           pip install setuptools wheel hatch
           hatch env create
 
+      - name: Make sure we didn't forget anything in pre-commit
+        run: |
+          hatch run pre-commit run --all
+
       - name: Test with pytest
         run: |
-          hatch run test:run
+          hatch run pytest
 
       - name: Build and publish
         env:

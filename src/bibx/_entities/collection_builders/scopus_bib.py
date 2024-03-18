@@ -32,9 +32,11 @@ class ScopusBibCollectionBuilder(CollectionBuilder):
         if "author" not in entry or "year" not in entry:
             raise MissingCriticalInformation()
         if "note" in entry:
-            times_cited = re.search(r"cited By (\d+)", entry["note"], re.IGNORECASE)
-            if times_cited:
-                times_cited = int(times_cited.groups()[0])
+            match = re.search(r"cited By (\d+)", entry["note"], re.IGNORECASE)
+            if match:
+                times_cited = int(match.groups()[0])
+            else:
+                times_cited = None
         else:
             times_cited = None
         return Article(

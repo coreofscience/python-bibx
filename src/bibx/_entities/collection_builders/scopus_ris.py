@@ -18,7 +18,7 @@ def _size(file) -> int:
     return size
 
 
-def _int_or_nothing(raw: List[str]) -> Optional[int]:
+def _int_or_nothing(raw: Optional[List[str]]) -> Optional[int]:
     if not raw:
         return None
     try:
@@ -102,9 +102,11 @@ class ScopusRisCollectionBuilder(CollectionBuilder):
         return Article(
             authors=[f"{first_name} {last_name.replace(' ', '').replace('.', '')}"],
             year=int(year),
-            journal=journal.strip().replace(".", "").upper()
-            if not journal.isspace()
-            else None,
+            journal=(
+                journal.strip().replace(".", "").upper()
+                if not journal.isspace()
+                else None
+            ),
             volume=volume_info.get("volume"),
             page=volume_info.get("page"),
             doi=doi,
