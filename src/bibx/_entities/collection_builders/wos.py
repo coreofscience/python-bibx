@@ -281,7 +281,7 @@ class WosCollectionBuilder(CollectionBuilder):
 
     @classmethod
     def _parse_article_from_str(cls, article_as_str: str) -> Article:
-        article_data: dict[str, list[str]] = collections.defaultdict(list)
+        article_data: Dict[str, List[str]] = collections.defaultdict(list)
         article_data.setdefault("CR", [])
         field = None
         for line in article_as_str.split("\n"):
