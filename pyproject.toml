@@ -39,6 +39,7 @@ ignore = ["E501"]
 
 [tool.mypy]
 mypy_path = "./stubs/"
+check_untyped_defs = true
 
 [build-system]
 requires = ["hatchling"]
