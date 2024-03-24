@@ -25,7 +25,7 @@ class JournalDataSet(metaclass=SingletonMeta):
         self._organized_journals: Dict[str, Journal] | None = None
 
     @property
-    def journal_data(self):
+    def journal_data(self) -> List[Dict]:
         if self._journal_data is None:
             with open(self._filename, "r") as file:
                 reader = csv.DictReader(file)
@@ -33,7 +33,7 @@ class JournalDataSet(metaclass=SingletonMeta):
         return self._journal_data
 
     @property
-    def journals(self):
+    def journals(self) -> List[Journal]:
         if self._journals is None:
             classifications: Dict[Tuple[str, str, str], Dict[int, str]] = defaultdict(
                 dict
@@ -52,13 +52,13 @@ class JournalDataSet(metaclass=SingletonMeta):
         return self._journals
 
     @property
-    def titles(self):
+    def titles(self) -> Set[str]:
         if self._titles is None:
             self._titles = {journal.title for journal in self.journals if journal.title}
         return self._titles
 
     @property
-    def abbreviations(self):
+    def abbreviations(self) -> Set[str]:
         if self._abbreviations is None:
             self._abbreviations = {
                 journal.abbr for journal in self.journals if journal.abbr
@@ -66,13 +66,13 @@ class JournalDataSet(metaclass=SingletonMeta):
         return self._abbreviations
 
     @property
-    def titles_and_abbreviations(self):
+    def titles_and_abbreviations(self) -> Set[str]:
         if self._titles_and_abbreviations is None:
             self._titles_and_abbreviations = self.titles.union(self.abbreviations)
         return self._titles_and_abbreviations
 
     @property
-    def titles_to_abbreviations(self):
+    def titles_to_abbreviations(self) -> Dict[str, str]:
         if self._titles_to_abbreviations is None:
             self._titles_to_abbreviations = {
                 journal.title: journal.abbr for journal in self.journals if journal.abbr
@@ -80,7 +80,7 @@ class JournalDataSet(metaclass=SingletonMeta):
         return self._titles_to_abbreviations
 
     @property
-    def organized_journals(self):
+    def organized_journals(self) -> Dict[str, Journal]:
         if self._organized_journals is None:
             self._organized_journals = {
                 journal.title: journal for journal in self.journals if journal.title
