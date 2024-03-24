@@ -1,7 +1,7 @@
 import csv
 import os
 from collections import defaultdict
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Tuple
 
 from bibx._entities.journal import Journal
 from bibx._fuzz.utils import normalize
@@ -16,7 +16,7 @@ class JournalDataSet(metaclass=SingletonMeta):
             os.path.pardir,
             "_data/scimago.csv",
         )
-        self._journal_data = None
+        self._journal_data: List[Dict] | None = None
         self._journals: List[Journal] | None = None
         self._titles: Set[str] | None = None
         self._abbreviations: Set[str] | None = None
@@ -35,7 +35,9 @@ class JournalDataSet(metaclass=SingletonMeta):
     @property
     def journals(self):
         if self._journals is None:
-            classifications = defaultdict(dict)
+            classifications: Dict[Tuple[str, str, str], Dict[int, str]] = defaultdict(
+                dict
+            )
             for row in self.journal_data:
                 title = normalize(row["title"])
                 abbr = normalize(row["abbr"])
