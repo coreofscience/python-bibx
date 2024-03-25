@@ -18,6 +18,8 @@ dependencies = [
     "networkx~=3.0",
     "typer[all]~=0.9.0",
     "xlsxwriter~=3.2.0",
+    "Levenshtein~=0.25.0",
+    "pybktree~=1.1.0",
 ]
 
 [project.optional-dependencies]
@@ -37,6 +39,7 @@ ignore = ["E501"]
 
 [tool.mypy]
 mypy_path = "./stubs/"
+check_untyped_defs = true
 
 [build-system]
 requires = ["hatchling"]

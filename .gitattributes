@@ -1,0 +1,1 @@
+src/bibx/_data/scimago.csv filter=lfs diff=lfs merge=lfs -text
