@@ -2,6 +2,8 @@
 A fuzzy journal resolver that uses the Levenshtein distance to resolve journal names.
 """
 
+from typing import Optional
+
 from pybktree import BKTree
 
 from bibx._entities.data_sets.journal_data_set import JournalDataSet
@@ -14,7 +16,7 @@ from bibx._utils.singleton_meta import SingletonMeta
 class JournalResolver(metaclass=SingletonMeta):
     def __init__(self) -> None:
         self.journal_data_set = JournalDataSet()
-        self._bk_tree: BKTree | None = None
+        self._bk_tree: Optional[BKTree] = None
 
     @property
     def bk_tree(self) -> BKTree:
@@ -24,7 +26,7 @@ class JournalResolver(metaclass=SingletonMeta):
                 self._bk_tree.add(word)
         return self._bk_tree
 
-    def resolve(self, journal: str) -> Journal | None:
+    def resolve(self, journal: str) -> Optional[Journal]:
         _journal = normalize(journal)
         if _journal == "":
             return None

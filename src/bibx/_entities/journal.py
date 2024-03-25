@@ -1,6 +1,6 @@
 from bisect import bisect_left
 from dataclasses import dataclass
-from typing import Dict
+from typing import Dict, Optional
 
 
 @dataclass
@@ -10,7 +10,7 @@ class Journal:
     issn: str
     classifications: Dict[int, str]
 
-    def classification(self, year: int) -> str | None:
+    def classification(self, year: int) -> Optional[str]:
         years = sorted(self.classifications.keys())
         if not years:
             return None
