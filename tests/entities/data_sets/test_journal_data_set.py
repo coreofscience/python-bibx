@@ -26,13 +26,13 @@ def test_journal_data_set_has_titles(journal_data_set: JournalDataSet):
 
 def test_journal_data_has_all_titles(journal_data_set: JournalDataSet):
     assert len(journal_data_set.titles_and_abbreviations) > len(journal_data_set.titles)
-    assert "" in journal_data_set.titles_and_abbreviations
+    assert "" not in journal_data_set.titles_and_abbreviations
 
 
 def test_journal_data_has_titles_to_abbreviations(journal_data_set: JournalDataSet):
     assert len(journal_data_set.titles_to_abbreviations) > 0
     assert len(journal_data_set.titles_to_abbreviations) <= len(journal_data_set.titles)
-    assert "" in journal_data_set.titles_to_abbreviations
+    assert "" not in journal_data_set.titles_to_abbreviations
 
 
 def test_journal_data_has_organized_journals(journal_data_set: JournalDataSet):
