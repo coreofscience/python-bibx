@@ -1,7 +1,10 @@
 import csv
+import io
 import os
 from collections import defaultdict
 from typing import Dict, List, Optional, Set, Tuple
+
+import zstandard
 
 from bibx._entities.journal import Journal
 from bibx._fuzz.utils import normalize
@@ -14,7 +17,7 @@ class JournalDataSet(metaclass=SingletonMeta):
             os.path.dirname(__file__),
             os.path.pardir,
             os.path.pardir,
-            "_data/scimago.csv",
+            "_data/scimago.csv.zst",
         )
         self._journal_data: Optional[List[Dict]] = None
         self._journals: Optional[List[Journal]] = None
@@ -27,8 +30,13 @@ class JournalDataSet(metaclass=SingletonMeta):
     @property
     def journal_data(self) -> List[Dict]:
         if self._journal_data is None:
-            with open(self._filename, "r") as file:
-                reader = csv.DictReader(file)
+            with open(self._filename, "rb") as file:
+                decompressor = zstandard.ZstdDecompressor()
+                decompressed = io.BytesIO()
+                decompressor.copy_stream(file, decompressed)
+                decompressed.seek(0)
+                decompressed_text = io.TextIOWrapper(decompressed, encoding="utf-8")
+                reader = csv.DictReader(decompressed_text)
                 self._journal_data = list(reader)
         return self._journal_data
 
