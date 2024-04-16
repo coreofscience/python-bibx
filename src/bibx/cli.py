@@ -30,11 +30,11 @@ def describe(format: Format, filename: str):
         print(f"There are {len(c.articles)} records parsed")
     if format == Format.RIS:
         c = read_scopus_ris(open(filename))
-        print(":boom: the file satisfies the ISI WOS format")
+        print(":boom: the file satisfies the Scopus RIS format")
         print(f"There are {len(c.articles)} records parsed")
     if format == Format.BIB:
         c = read_scopus_bib(open(filename))
-        print(":boom: the file satisfies the ISI WOS format")
+        print(":boom: the file satisfies the Scopus BIB format")
         print(f"There are {len(c.articles)} records parsed")
 
 
