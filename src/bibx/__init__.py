@@ -57,6 +57,12 @@ def read_any(file: TextIO) -> Collection:
     Tries to read a file with the supported formats.
     """
     for handler in (read_wos, read_scopus_ris, read_scopus_bib):
-        with suppress(BibXError):
+        try:
             return handler(file)
-    raise ValueError("Unsuported file type")
+        except BibXError as e:
+            print(f"Error: {e}")
+        except ValueError as e:
+            if "invalid literal" in str(e):
+                print(
+                    f"Error: the {handler} function does not support this file type")
+    raise ValueError("Unsupported file type")
