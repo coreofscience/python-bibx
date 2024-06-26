@@ -9,6 +9,10 @@ from bibx._entities.collection_builders.wos import WosCollectionBuilder
 from bibx.algorithms.sap import Sap
 from bibx.exceptions import BibXError
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 __all__ = [
     "Article",
     "Collection",
@@ -60,9 +64,8 @@ def read_any(file: TextIO) -> Collection:
         try:
             return handler(file)
         except BibXError as e:
-            print(f"Error: {e}")
+            logger.debug(f"Error: {e}")
         except ValueError as e:
             if "invalid literal" in str(e):
-                print(
-                    f"Error: the {handler} function does not support this file type")
+                logger.debug(f'Error: the {handler.__name__} function does not support this file')
     raise ValueError("Unsupported file type")
