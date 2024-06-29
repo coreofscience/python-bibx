@@ -1,3 +1,4 @@
+import logging
 from typing import TextIO
 
 from bibx._entities.article import Article
@@ -7,8 +8,6 @@ from bibx._entities.collection_builders.scopus_ris import ScopusRisCollectionBui
 from bibx._entities.collection_builders.wos import WosCollectionBuilder
 from bibx.algorithms.sap import Sap
 from bibx.exceptions import BibXError
-
-import logging
 
 logger = logging.getLogger(__name__)
 
