@@ -1,4 +1,3 @@
-from contextlib import suppress
 from typing import TextIO
 
 from bibx._entities.article import Article
@@ -65,7 +64,6 @@ def read_any(file: TextIO) -> Collection:
             return handler(file)
         except BibXError as e:
             logger.debug(f"Error: {e}")
-        except ValueError as e:
-            if "invalid literal" in str(e):
-                logger.debug(f'Error: the {handler.__name__} function does not support this file')
+        except ValueError:
+            logger.debug(f'Error: the {handler.__name__} function does not support this file')
     raise ValueError("Unsupported file type")
