@@ -64,5 +64,7 @@ def read_any(file: TextIO) -> Collection:
         except BibXError as e:
             logger.debug(f"Error: {e}")
         except ValueError:
-            logger.debug(f'Error: the {handler.__name__} function does not support this file')
+            logger.debug(
+                f"Error: the {handler.__name__} function does not support this file"
+            )
     raise ValueError("Unsupported file type")
