@@ -1,4 +1,4 @@
-from contextlib import suppress
+import logging
 from typing import TextIO
 
 from bibx._entities.article import Article
@@ -8,6 +8,8 @@ from bibx._entities.collection_builders.scopus_ris import ScopusRisCollectionBui
 from bibx._entities.collection_builders.wos import WosCollectionBuilder
 from bibx.algorithms.sap import Sap
 from bibx.exceptions import BibXError
+
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "Article",
@@ -57,6 +59,12 @@ def read_any(file: TextIO) -> Collection:
     Tries to read a file with the supported formats.
     """
     for handler in (read_wos, read_scopus_ris, read_scopus_bib):
-        with suppress(BibXError):
+        try:
             return handler(file)
-    raise ValueError("Unsuported file type")
+        except BibXError as e:
+            logger.debug(f"Error: {e}")
+        except ValueError:
+            logger.debug(
+                f"Error: the {handler.__name__} function does not support this file"
+            )
+    raise ValueError("Unsupported file type")
