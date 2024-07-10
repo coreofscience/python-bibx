@@ -22,7 +22,10 @@ class CrossRefCollectionBuilder(CollectionBuilder):
         articles = []
         for item in items:
             author_list = item.get("author", [])
-            authors = [f"{author.get('given', '')} {author.get('family', '')}" for author in author_list]
+            authors = [
+                f"{author.get('given', '')} {author.get('family', '')}"
+                for author in author_list
+            ]
             publication_year = item.get("published").get("date-parts", [[2000]])[0][0]
             title = item.get("title", None)[0]
             journal = item.get("container-title", None)[0]
