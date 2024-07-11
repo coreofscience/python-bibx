@@ -177,7 +177,7 @@ class ScopusRisCollectionBuilder(CollectionBuilder):
     @classmethod
     def _parse_file(cls, file: TextIO) -> Iterable[Article]:
         if not _size(file):
-            return []
+            yield from []
         for item in file.read().split("\n\n"):
             if item.isspace():
                 continue
