@@ -34,7 +34,23 @@ class CrossRefCollectionBuilder(CollectionBuilder):
             page = item.get("page", None)
             doi = item.get("DOI", None)
             times_cited = item.get("is-referenced-by-count", 0)
-            references = item.get("reference", [])
+            reference = item.get("reference", [])
+            references = []
+            for ref in reference:
+                if ref.get("unstructured", None) is not None:
+                    unique_reference = Article(title=ref.get("unstructured", None))
+                else:
+                    unique_reference = Article(
+                        authors=[ref.get("author", [])],
+                        year=ref.get("year", None),
+                        title=ref.get("article-title", None),
+                        journal=ref.get("journal-title", None),
+                        volume=ref.get("volume", None),
+                        issue=ref.get("issue", None),
+                        page=ref.get("page", None),
+                        doi=ref.get("DOI", None),
+                    )
+                references.append(unique_reference)
 
             article = Article(
                 authors=authors,
