@@ -9,6 +9,8 @@ from xlsxwriter.worksheet import Worksheet
 
 from bibx import Collection
 
+from .sap import BRANCH, LEAF, ROOT, TRUNK, Sap
+
 
 class Preprocess:
     def __init__(self, wos: Collection, scopus: Collection) -> None:
@@ -150,6 +152,61 @@ class Preprocess:
             workseet.write(i, 1, times_cited)
             workseet.write(i, 2, times_cited / total)
 
+    @staticmethod
+    def _get_tos(data: dict) -> str:
+        if data[ROOT] > 0:
+            return "Root"
+        elif data[TRUNK] > 0:
+            return "Trunk"
+        elif data[LEAF] > 0:
+            return "Leaf"
+        elif data[BRANCH] > 0:
+            return f"Branch {data[BRANCH]}"
+        return "_"
+
+    def write_tree_of_science_information(self, workseet: Worksheet) -> None:
+        s = Sap()
+        g = s.create_graph(self.merged)
+        g = s.clean_graph(g)
+        g = s.tree(g)
+
+        for i, title in enumerate(
+            [
+                "TOS",
+                "Label",
+                "Authors",
+                "Year",
+                "Title",
+                "Journal",
+                "Volume",
+                "Issue",
+                "Page",
+                "DOI",
+                "Times Cited",
+            ]
+        ):
+            workseet.write(0, i, title)
+
+        i = 1
+        for label, data in sorted(
+            g.nodes(data=True), key=lambda x: self._get_tos(x[1])
+        ):
+            tos = self._get_tos(data)
+            if tos == "_":
+                continue
+            workseet.write(i, 0, tos)
+            workseet.write(i, 1, label)
+            workseet.write(i, 2, "; ".join(data["authors"]))
+            workseet.write(i, 3, data["year"])
+            workseet.write(i, 4, data["title"])
+            workseet.write(i, 5, data["journal"])
+            workseet.write(i, 6, data["volume"])
+            workseet.write(i, 7, data["issue"])
+            workseet.write(i, 8, data["page"])
+            workseet.write(i, 9, data["doi"])
+            workseet.write(i, 10, data["times_cited"])
+            i += 1
+
     def create_workbook(self, filename: str) -> None:
         workbook = Workbook(filename)
         self.write_merged_information(workbook.add_worksheet("Merged"))
@@ -159,4 +216,7 @@ class Preprocess:
         self.write_journal_information(workbook.add_worksheet("Journals"))
         self.write_author_information(workbook.add_worksheet("Authors"))
         self.write_times_cited_information(workbook.add_worksheet("Times Cited"))
+        self.write_tree_of_science_information(
+            workbook.add_worksheet("Tree of Science")
+        )
         workbook.close()
