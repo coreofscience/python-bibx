@@ -1,5 +1,9 @@
 # bibx
 
+[![CI](https://github.com/coreofscience/python-bibx/actions/workflows/ci.yml/badge.svg)](https://github.com/coreofscience/python-bibx/actions/workflows/ci.yml)
+![pypi](https://img.shields.io/pypi/v/pybadges.svg)
+[![DOI](https://zenodo.org/badge/565499325.svg)](https://zenodo.org/badge/latestdoi/565499325)
+
 A python library with bibliographic and biblio-metric tools.
 
 ## Features
