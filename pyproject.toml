@@ -42,9 +42,3 @@ mypy_path = "./stubs/"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
-
-[tool.hatch.version]
-path = "src/bibx/__init__.py"
-
-[tool.hatch.envs.default]
-features = ["dev"]
