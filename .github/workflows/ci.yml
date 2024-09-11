@@ -13,11 +13,11 @@ jobs:
     name: CI for ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     env:
-      USING_COVERAGE: "3.8,3.11"
+      USING_COVERAGE: "3.8,3.12"
 
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
     steps:
       - uses: actions/checkout@v3
@@ -25,14 +25,14 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install dependencies
-        run: |
-          python -VV
-          python -m site
-          python -m pip install --upgrade pip setuptools wheel hatch==1.6.3
+      - name: Setup uv
+        uses: yezz123/setup-uv@v4
+        with:
+          uv-version: "0.4.9"
+          uv-venv: ".venv"
 
       - name: Run tests for ${{ matrix.python-version }}
         run: |
-          hatch env create
-          hatch run pre-commit run --all
-          hatch run pytest
+          uv pip install ".[dev]"
+          uv run pre-commit run --all
+          uv run pytest
