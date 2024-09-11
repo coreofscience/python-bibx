@@ -20,19 +20,21 @@ jobs:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Setup uv
-        uses: yezz123/setup-uv@v4
+        uses: astral-sh/setup-uv@v2
         with:
+          enable-cache: true
           uv-version: "0.4.9"
-          uv-venv: ".venv"
 
       - name: Run tests for ${{ matrix.python-version }}
         run: |
+          uv venv .venv
           uv pip install ".[dev]"
           uv run pre-commit run --all
           uv run pytest
