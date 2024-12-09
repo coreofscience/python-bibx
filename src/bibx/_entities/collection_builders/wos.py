@@ -2,9 +2,10 @@ import collections
 import functools
 import logging
 import re
+from collections.abc import Iterable, Mapping
 from contextlib import suppress
 from dataclasses import dataclass
-from typing import Any, Callable, Iterable, Mapping, Optional, TextIO
+from typing import Any, Callable, Optional, TextIO
 
 from bibx._entities.article import Article
 from bibx._entities.collection import Collection

@@ -1,7 +1,8 @@
 import logging
 import re
 from collections import defaultdict
-from typing import Iterable, Optional, TextIO
+from collections.abc import Iterable
+from typing import Optional, TextIO
 
 from bibx._entities.article import Article
 from bibx._entities.collection import Collection

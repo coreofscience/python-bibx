@@ -1,7 +1,8 @@
 import json
 import re
+from collections.abc import Iterable
 from contextlib import suppress
-from typing import Iterable, Optional, TextIO
+from typing import Optional, TextIO
 
 import bibtexparser
 
