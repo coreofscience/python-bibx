@@ -1,7 +1,7 @@
 import datetime
 import logging
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Tuple
+from typing import Iterable
 
 from bibx._entities.article import Article
 
@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class Collection:
-    articles: List[Article]
+    articles: list[Article]
 
     def merge(self, other: "Collection") -> "Collection":
         """
@@ -38,7 +38,7 @@ class Collection:
         yield from cache.values()
 
     @property
-    def citation_pairs(self) -> Iterable[Tuple[Article, Article]]:
+    def citation_pairs(self) -> Iterable[tuple[Article, Article]]:
         cache = {article.key: article for article in self.articles}
         for article in self.articles:
             if not article.references:
@@ -62,7 +62,7 @@ class Collection:
             [article.year for article in self.articles if article.year is not None]
         )
 
-    def published_by_year(self) -> Dict[int, int]:
+    def published_by_year(self) -> dict[int, int]:
         """
         Returns a dictionary where the key is the year of publication and the value is the number of articles
         published that year. The dictionary starts from the oldest article to the current year consecutively.
@@ -84,7 +84,7 @@ class Collection:
                 years[article.year] = 1
         return years
 
-    def cited_by_year(self) -> Dict[int, int]:
+    def cited_by_year(self) -> dict[int, int]:
         """
         Returns a dictionary where the key is the year of publication and the value is the number of
         citations in that year. The dictionary starts from the oldest article to the current year consecutively.

@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from enum import Enum
-from typing import List, TextIO
+from typing import TextIO
 
 import networkx as nx
 import typer
@@ -85,8 +85,8 @@ def _read_many(
 @app.command()
 def preprocess(
     output: str,
-    wos: List[str] = typer.Option(help="WoS files to pre process"),
-    scopus: List[str] = typer.Option(help="scopus files to preprocess"),
+    wos: list[str] = typer.Option(help="WoS files to pre process"),
+    scopus: list[str] = typer.Option(help="scopus files to preprocess"),
 ):
     """
     Preprocesses a collection.

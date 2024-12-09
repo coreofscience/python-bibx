@@ -1,7 +1,7 @@
 import logging
 import re
 from collections import defaultdict
-from typing import Dict, Iterable, List, Optional, TextIO, Tuple
+from typing import Iterable, Optional, TextIO
 
 from bibx._entities.article import Article
 from bibx._entities.collection import Collection
@@ -18,7 +18,7 @@ def _size(file) -> int:
     return size
 
 
-def _int_or_nothing(raw: Optional[List[str]]) -> Optional[int]:
+def _int_or_nothing(raw: Optional[list[str]]) -> Optional[int]:
     if not raw:
         return None
     try:
@@ -27,7 +27,7 @@ def _int_or_nothing(raw: Optional[List[str]]) -> Optional[int]:
         return None
 
 
-def _joined(raw: Optional[List[str]]) -> Optional[str]:
+def _joined(raw: Optional[list[str]]) -> Optional[str]:
     if not raw:
         return None
     return " ".join(raw)
@@ -48,7 +48,7 @@ class ScopusRisCollectionBuilder(CollectionBuilder):
             yield from self._parse_file(file)
 
     @staticmethod
-    def _find_volume_info(ref: str) -> Tuple[Dict[str, str], str]:
+    def _find_volume_info(ref: str) -> tuple[dict[str, str], str]:
         volume_pattern = re.compile(r"(?P<volume>\d+)( \((?P<issue>.+?)\))?")
         page_pattern = re.compile(r"(pp?\. (?P<page>\w+)(-[^,\s]+)?)")
         page = page_pattern.search(ref)
@@ -79,7 +79,7 @@ class ScopusRisCollectionBuilder(CollectionBuilder):
         return data, ref[last_index:]
 
     @staticmethod
-    def _find_doi(ref: str) -> Tuple[Optional[str], str]:
+    def _find_doi(ref: str) -> tuple[Optional[str], str]:
         pattern = re.compile(
             r"((doi.org\/)|(aps.org\/doi\/)|(DOI:?)) ?(?P<doi>[^\s,;:]{5,})", re.I
         )
@@ -113,7 +113,7 @@ class ScopusRisCollectionBuilder(CollectionBuilder):
         )
 
     @classmethod
-    def _parse_references(cls, refs: List[str]) -> List[Article]:
+    def _parse_references(cls, refs: list[str]) -> list[Article]:
         if not refs:
             return []
         result = []
@@ -125,7 +125,7 @@ class ScopusRisCollectionBuilder(CollectionBuilder):
         return result
 
     @staticmethod
-    def _ris_to_dict(record: str) -> Dict[str, List[str]]:
+    def _ris_to_dict(record: str) -> dict[str, list[str]]:
         RIS_PATTERN = re.compile(
             r"^(((?P<key>[A-Z0-9]{2}))[ ]{2}-[ ]{1})?(?P<value>(.*))$"
         )

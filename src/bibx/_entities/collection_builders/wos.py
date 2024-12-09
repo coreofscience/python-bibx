@@ -4,7 +4,7 @@ import logging
 import re
 from contextlib import suppress
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, TextIO
+from typing import Any, Callable, Iterable, Mapping, Optional, TextIO
 
 from bibx._entities.article import Article
 from bibx._entities.collection import Collection
@@ -18,15 +18,15 @@ from bibx.exceptions import (
 logger = logging.getLogger(__name__)
 
 
-def _joined(values: List[str], separator: str = " ") -> str:
+def _joined(values: list[str], separator: str = " ") -> str:
     return separator.join(value.strip() for value in values)
 
 
-def _ident(values: List[str]) -> List[str]:
+def _ident(values: list[str]) -> list[str]:
     return [value.strip() for value in values]
 
 
-def _delimited(values: List[str], delimiter: str = "; ") -> List[str]:
+def _delimited(values: list[str], delimiter: str = "; ") -> list[str]:
     return [
         word.replace(delimiter.strip(), "")
         for words in values
@@ -35,7 +35,7 @@ def _delimited(values: List[str], delimiter: str = "; ") -> List[str]:
     ]
 
 
-def _integer(values: List[str]) -> int:
+def _integer(values: list[str]) -> int:
     if len(values) > 1:
         raise ValueError(f"Expected no more than one item and got {len(values)}")
 
@@ -48,9 +48,9 @@ class IsiField:
     key: str
     description: str
     parser: Callable
-    aliases: List[str]
+    aliases: list[str]
 
-    def parse(self, value: List[str]):
+    def parse(self, value: list[str]):
         return self.parser(value)
 
 
@@ -271,7 +271,7 @@ class WosCollectionBuilder(CollectionBuilder):
 
     @classmethod
     def _get_articles_from_references(
-        cls, references: Optional[List[str]]
+        cls, references: Optional[list[str]]
     ) -> Iterable[Article]:
         if not references:
             return
@@ -281,7 +281,7 @@ class WosCollectionBuilder(CollectionBuilder):
 
     @classmethod
     def _parse_article_from_str(cls, article_as_str: str) -> Article:
-        article_data: Dict[str, List[str]] = collections.defaultdict(list)
+        article_data: dict[str, list[str]] = collections.defaultdict(list)
         article_data.setdefault("CR", [])
         field = None
         for line in article_as_str.split("\n"):
@@ -337,7 +337,7 @@ class WosCollectionBuilder(CollectionBuilder):
         )
 
     @classmethod
-    def _parse_all(cls, article_data: Dict[str, List[str]]) -> Mapping[str, Any]:
+    def _parse_all(cls, article_data: dict[str, list[str]]) -> Mapping[str, Any]:
         processed_data = {}
         for key, values in article_data.items():
             parsed_values_dict = cls._parse(key, values)
@@ -345,7 +345,7 @@ class WosCollectionBuilder(CollectionBuilder):
         return processed_data
 
     @classmethod
-    def _parse(cls, key: str, value: List[str]) -> Dict:
+    def _parse(cls, key: str, value: list[str]) -> dict:
         if key in {"FN", "VR", "ER"}:
             return {}
 
