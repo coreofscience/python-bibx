@@ -1,6 +1,6 @@
 import dataclasses
 import logging
-from typing import Any, List, Set, Tuple, cast
+from typing import Any, cast
 
 import networkx as nx
 from networkx.algorithms.community.louvain import louvain_communities
@@ -21,7 +21,7 @@ RAW_SAP = "_raw_sap"
 logger = logging.getLogger(__name__)
 
 
-def _limit(attribute: List[Tuple[Any, int]], _max: int):
+def _limit(attribute: list[tuple[Any, int]], _max: int):
     if _max is not None:
         sorted_attribute = sorted(attribute, key=lambda x: x[1], reverse=True)
         attribute = sorted_attribute[:_max]
@@ -286,7 +286,7 @@ class Sap:
         """
         g = cast(nx.DiGraph, graph.copy())
         undirected = g.to_undirected()
-        communities: List[Set] = louvain_communities(undirected)
+        communities: list[set] = louvain_communities(undirected)
         branches = list(sorted(communities, key=len))[:3]
         nx.set_node_attributes(g, 0, BRANCH)
         for i, branch in enumerate(branches, start=1):

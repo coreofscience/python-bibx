@@ -13,11 +13,11 @@ jobs:
     name: CI for ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     env:
-      USING_COVERAGE: "3.8,3.12"
+      USING_COVERAGE: "3.9,3.13"
 
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
     steps:
       - uses: actions/checkout@v4
@@ -30,7 +30,7 @@ jobs:
         uses: astral-sh/setup-uv@v2
         with:
           enable-cache: true
-          version: "0.4.9"
+          version: "0.5.7"
 
       - name: Run tests for ${{ matrix.python-version }}
         run: |

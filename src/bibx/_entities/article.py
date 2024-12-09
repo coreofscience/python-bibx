@@ -1,10 +1,11 @@
+from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import List, Mapping, Optional, Set
+from typing import Optional
 
 
 @dataclass
 class Article:
-    authors: List[str] = field(default_factory=list)
+    authors: list[str] = field(default_factory=list)
     year: Optional[int] = None
     title: Optional[str] = None
     journal: Optional[str] = None
@@ -14,9 +15,9 @@ class Article:
     doi: Optional[str] = None
     _label: Optional[str] = None
     times_cited: Optional[int] = None
-    references: List["Article"] = field(default_factory=list)
-    keywords: List[str] = field(default_factory=list)
-    sources: Set[str] = field(default_factory=set)
+    references: list["Article"] = field(default_factory=list)
+    keywords: list[str] = field(default_factory=list)
+    sources: set[str] = field(default_factory=set)
     extra: Mapping = field(default_factory=dict)
 
     @property
