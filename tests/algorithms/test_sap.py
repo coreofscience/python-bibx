@@ -1,4 +1,5 @@
 import networkx as nx
+
 from bibx.algorithms.sap import Sap
 
 

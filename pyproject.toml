@@ -33,7 +33,7 @@ dev = [
 bibx = "bibx.cli:app"
 
 [tool.ruff.lint]
-select = ["I", "E", "F", "W"]
+select = ["I", "E", "F", "UP", "W"]
 ignore = ["E501"]
 
 [tool.mypy]
