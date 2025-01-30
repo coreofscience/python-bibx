@@ -3,7 +3,8 @@ import io
 from bibx import read_wos
 
 
-def test_scopus_works():
+def test_scopus_works() -> None:
+    """Test that we can read a Scopus file."""
     file = io.StringIO(
         """
 FN Thomson Reuters Web of Science™
@@ -105,14 +106,14 @@ SC Polymer Science
 GA EU7BQ
 UT WOS:000401190100002
 ER
-"""
+"""  # noqa: E501
     )
     data = read_wos(file)
     assert len(data.articles) == 1
     (article,) = data.articles
     assert (
         article.title
-        == "In situ grazing incidence small-angle X-ray scattering study of solvent vapor annealing in lamellae-forming block copolymer thin films: Trade-off of defects in deswelling"
+        == "In situ grazing incidence small-angle X-ray scattering study of solvent vapor annealing in lamellae-forming block copolymer thin films: Trade-off of defects in deswelling"  # noqa: E501
     )
-    assert len(list(data.citation_pairs)) == 37
+    assert len(list(data.citation_pairs)) == 37  # noqa: PLR2004
     assert article.times_cited == 0

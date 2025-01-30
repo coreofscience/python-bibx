@@ -5,15 +5,15 @@ import re
 from collections.abc import Iterable, Mapping
 from contextlib import suppress
 from dataclasses import dataclass
-from typing import Any, Callable, Optional, TextIO
+from typing import Any, Callable, ClassVar, Optional, TextIO, Union
 
 from bibx._entities.article import Article
 from bibx._entities.collection import Collection
 from bibx._entities.collection_builders.base import CollectionBuilder
 from bibx.exceptions import (
     InvalidIsiLineError,
-    InvalidIsiReference,
-    MissingCriticalInformation,
+    InvalidIsiReferenceError,
+    MissingCriticalInformationError,
 )
 
 logger = logging.getLogger(__name__)
@@ -38,7 +38,8 @@ def _delimited(values: list[str], delimiter: str = "; ") -> list[str]:
 
 def _integer(values: list[str]) -> int:
     if len(values) > 1:
-        raise ValueError(f"Expected no more than one item and got {len(values)}")
+        message = f"Expected no more than one item and got {len(values)}"
+        raise ValueError(message)
 
     first, *_ = values
     return int(first.strip())
@@ -51,7 +52,7 @@ class IsiField:
     parser: Callable
     aliases: list[str]
 
-    def parse(self, value: list[str]):
+    def parse(self, value: list[str]) -> Union[str, int, list[str]]:
         return self.parser(value)
 
 
@@ -70,7 +71,7 @@ class WosCollectionBuilder(CollectionBuilder):
         re.X,
     )
 
-    FIELDS = {
+    FIELDS: ClassVar = {
         "AB": IsiField("AB", "Abstract", _joined, ["abstract"]),
         "AF": IsiField("AF", "Author Full Names", _ident, ["author_full_names"]),
         "AR": IsiField("AR", "Article Number", _joined, ["article_number"]),
@@ -247,7 +248,7 @@ class WosCollectionBuilder(CollectionBuilder):
         ),
     }
 
-    def __init__(self, *isi_files: TextIO):
+    def __init__(self, *isi_files: TextIO) -> None:
         self._files = isi_files
         for file in self._files:
             file.seek(0)
@@ -266,7 +267,7 @@ class WosCollectionBuilder(CollectionBuilder):
 
     def _get_articles_from_files(self) -> Iterable[Article]:
         for article_as_str in self._get_articles_as_str_from_files():
-            with suppress(MissingCriticalInformation):
+            with suppress(MissingCriticalInformationError):
                 article = self._parse_article_from_str(article_as_str)
                 yield article
 
@@ -277,7 +278,7 @@ class WosCollectionBuilder(CollectionBuilder):
         if not references:
             return
         for ref_str in references:
-            with suppress(InvalidIsiReference):
+            with suppress(InvalidIsiReferenceError):
                 yield cls._parse_reference_from_str(ref_str)
 
     @classmethod
@@ -319,7 +320,7 @@ class WosCollectionBuilder(CollectionBuilder):
     def _parse_reference_from_str(cls, reference: str) -> Article:
         match = cls.ISI_CITATION_PATTERN.match(reference)
         if not match:
-            raise InvalidIsiReference(reference)
+            raise InvalidIsiReferenceError(reference)
         data = {key: [value] for key, value in match.groupdict().items() if value}
         processed = cls._parse_all(data)
         return Article(
@@ -355,5 +356,5 @@ class WosCollectionBuilder(CollectionBuilder):
             parsed_value = field.parse(value)
             return {new_key: parsed_value for new_key in [field.key, *field.aliases]}
 
-        logger.debug(f"Found an unknown field with key {key} and value {value}")
+        logger.debug("Found an unknown field with key %s and value %s", key, value)
         return {key: _ident(value)}

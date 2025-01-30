@@ -21,7 +21,7 @@ class Article:
     extra: Mapping = field(default_factory=dict)
 
     @property
-    def key(self):
+    def key(self) -> str:
         if self.authors:
             author = self.authors[0].split(" ")[0].replace(",", "")
         else:
@@ -30,7 +30,7 @@ class Article:
         return f"{author}{year}".lower()
 
     @property
-    def label(self):
+    def label(self) -> str:
         if self._label is not None:
             return self._label
         pieces = {

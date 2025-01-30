@@ -1,3 +1,5 @@
+"""BibX is a library to work with bibliographic data."""
+
 import logging
 from typing import TextIO
 
@@ -15,18 +17,17 @@ __all__ = [
     "Article",
     "Collection",
     "Sap",
+    "read_any",
     "read_scopus_bib",
     "read_scopus_ris",
     "read_wos",
-    "read_any",
 ]
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 
 def read_scopus_bib(*files: TextIO) -> Collection:
-    """
-    Takes any number of bibtex files from scopus and generates a collection.
+    """Take any number of bibtex files from scopus and generates a collection.
 
     :param files: Scopus bib files open.
     :return: the collection
@@ -35,8 +36,7 @@ def read_scopus_bib(*files: TextIO) -> Collection:
 
 
 def read_scopus_ris(*files: TextIO) -> Collection:
-    """
-    Takes any number of ris files from scopus and generates a collection.
+    """Take any number of ris files from scopus and generates a collection.
 
     :param files: Scopus bib files open.
     :return: the collection
@@ -45,8 +45,7 @@ def read_scopus_ris(*files: TextIO) -> Collection:
 
 
 def read_wos(*files: TextIO) -> Collection:
-    """
-    Takes any number of wos text files and returns a collection.
+    """Take any number of wos text files and returns a collection.
 
     :param files: WoS files open.
     :return: the collection
@@ -55,16 +54,15 @@ def read_wos(*files: TextIO) -> Collection:
 
 
 def read_any(file: TextIO) -> Collection:
-    """
-    Tries to read a file with the supported formats.
-    """
+    """Try to read a file with the supported formats."""
     for handler in (read_wos, read_scopus_ris, read_scopus_bib):
         try:
             return handler(file)
         except BibXError as e:
-            logger.debug(f"Error: {e}")
+            logger.debug("Error: %s", e)
         except ValueError:
             logger.debug(
-                f"Error: the {handler.__name__} function does not support this file"
+                "Error: the %s function does not support this file", handler.__name__
             )
-    raise ValueError("Unsupported file type")
+    message = "Unsupported file type"
+    raise ValueError(message)

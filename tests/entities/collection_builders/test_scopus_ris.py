@@ -3,7 +3,8 @@ import io
 from bibx import read_scopus_ris
 
 
-def test_scopus_works():
+def test_scopus_works() -> None:
+    """Test that we can read a scopus RIS file."""
     file = io.StringIO(
         """
 TY  - JOUR
@@ -33,15 +34,15 @@ Papusoi, C., Srinivasan, K., Acharya, R., (2011) J. Appl. Phys., 110;
 Papusoi, C., Desai, M., Acharya, R., (2015) J. Phys. D Appl. Phys., 48;
 UR  - https://www.scopus.com/inward/record.uri?eid=2-s2.0-85091557653&doi=10.1063%2f5.0020407&partnerID=40&md5=1471f5e876fae65e040690b345036add
 ER  -
-"""
+"""  # noqa: E501
     )
     data = read_scopus_ris(file)
     assert len(data.articles) == 1
     (article,) = data.articles
     assert (
         article.title
-        == "FORC signatures and switching-field distributions of dipolar coupled nanowire-based hysterons"
+        == "FORC signatures and switching-field distributions of dipolar coupled nanowire-based hysterons"  # noqa: E501
     )
-    assert article.year == 2020
-    assert len(list(data.citation_pairs)) == 10
+    assert article.year == 2020  # noqa: PLR2004
+    assert len(list(data.citation_pairs)) == 10  # noqa: PLR2004
     assert article.times_cited is None

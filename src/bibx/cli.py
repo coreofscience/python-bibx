@@ -4,7 +4,7 @@ from typing import TextIO
 
 import networkx as nx
 import typer
-from rich import print
+from rich import print as rprint
 
 from bibx import Collection, read_any, read_scopus_bib, read_scopus_ris, read_wos
 from bibx.algorithms.preprocess import Preprocess
@@ -14,35 +14,36 @@ app = typer.Typer()
 
 
 class Format(Enum):
+    """Supported formats."""
+
     WOS = "wos"
     RIS = "ris"
     BIB = "bib"
 
 
 @app.command()
-def describe(format: Format, filename: str):
-    """
-    Parses a file and provides a short description.
-    """
+def describe(format: Format, filename: str) -> None:
+    """Parse a file and provides a short description."""
     if format == Format.WOS:
-        c = read_wos(open(filename))
-        print(":boom: the file satisfies the ISI WOS format")
-        print(f"There are {len(c.articles)} records parsed")
+        with open(filename) as f:
+            c = read_wos(f)
+        rprint(":boom: the file satisfies the ISI WOS format")
+        rprint(f"There are {len(c.articles)} records parsed")
     if format == Format.RIS:
-        c = read_scopus_ris(open(filename))
-        print(":boom: the file satisfies the ISI WOS format")
-        print(f"There are {len(c.articles)} records parsed")
+        with open(filename) as f:
+            c = read_scopus_ris(f)
+        rprint(":boom: the file satisfies the ISI WOS format")
+        rprint(f"There are {len(c.articles)} records parsed")
     if format == Format.BIB:
-        c = read_scopus_bib(open(filename))
-        print(":boom: the file satisfies the ISI WOS format")
-        print(f"There are {len(c.articles)} records parsed")
+        with open(filename) as f:
+            c = read_scopus_bib(f)
+        rprint(":boom: the file satisfies the ISI WOS format")
+        rprint(f"There are {len(c.articles)} records parsed")
 
 
 @app.command()
-def toy_sap():
-    """
-    Runs the sap algorithm on a toy graph.
-    """
+def toy_sap() -> None:
+    """Run the sap algorithm on a toy graph."""
     graph = nx.DiGraph()
     for node in "abcde":
         graph.add_node(node, year=2000)
@@ -51,14 +52,12 @@ def toy_sap():
         graph.add_edge("b", node)
     s = Sap()
     graph = s.tree(graph)
-    print(graph)
+    rprint(graph)
 
 
 @app.command()
-def sap(filename: str):
-    """
-    Runs the sap algorithm on a seed file of any supported format.
-    """
+def sap(filename: str) -> None:
+    """Run the sap algorithm on a seed file of any supported format."""
     with open(filename) as f:
         collection = read_any(f)
 
@@ -66,7 +65,7 @@ def sap(filename: str):
     graph = s.create_graph(collection)
     graph = s.clean_graph(graph)
     graph = s.tree(graph)
-    print(graph)
+    rprint(graph)
 
 
 def _read_many(
@@ -87,14 +86,13 @@ def preprocess(
     output: str,
     wos: list[str] = typer.Option(help="WoS files to pre process"),
     scopus: list[str] = typer.Option(help="scopus files to preprocess"),
-):
-    """
-    Preprocesses a collection.
-    """
+) -> None:
+    """Preprocesses a collection."""
     wos_collection = _read_many(read_wos, *wos)
     scopus_collection = _read_many(read_scopus_ris, *scopus)
     p = Preprocess(wos_collection, scopus_collection)
     p.create_workbook(output)
+    rprint(f":boom: workbook created at {output}")
 
 
 if __name__ == "__main__":

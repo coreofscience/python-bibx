@@ -3,11 +3,11 @@ from bibx._entities.collection_builders.base import CollectionBuilder
 
 
 class CrossRefCollectionBuilder(CollectionBuilder):
-    def __init__(self, query: str, count: int = 100):
+    def __init__(self, query: str, count: int = 100) -> None:
         self._query = query
         self._count = count
 
-    def with_count(self, count: int):
+    def with_count(self, count: int) -> "CrossRefCollectionBuilder":
         self._count = count
         return self
 

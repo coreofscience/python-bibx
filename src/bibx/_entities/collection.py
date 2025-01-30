@@ -13,8 +13,7 @@ class Collection:
     articles: list[Article]
 
     def merge(self, other: "Collection") -> "Collection":
-        """
-        Creates a new collection merging the articles by key.
+        """Create a new collection merging the articles by key.
 
         :param other: collection to merge to.
         :return: a new collection object.
@@ -26,8 +25,7 @@ class Collection:
 
     @property
     def all_articles(self) -> Iterable[Article]:
-        """
-        Yields all articles and references
+        """Yield all articles and references.
 
         :return: an iterable over `Article`.
         """
@@ -53,8 +51,7 @@ class Collection:
 
     @property
     def _first_year(self) -> int:
-        """
-        Returns the year of the first article in the collection.
+        """Returns the year of the first article in the collection.
 
         :return: an integer.
         """
@@ -63,14 +60,16 @@ class Collection:
         )
 
     def published_by_year(self) -> dict[int, int]:
-        """
-        Returns a dictionary where the key is the year of publication and the value is the number of articles
-        published that year. The dictionary starts from the oldest article to the current year consecutively.
-        If a year has no publications the value will be zero.
+        """Retrn a dictionary with the publication count by year.
+
+        Returns a dictionary where the key is the year of publication and the
+        value is the number of articles published that year. The dictionary
+        starts from the oldest article to the current year consecutively. If a
+        year has no publications the value will be zero.
 
         :return: a dictionary with the number of articles published each year.
         """
-        current_year = datetime.date.today().year
+        current_year = datetime.datetime.utcnow().year
         years = {}
         for year in range(self._first_year, current_year + 1):
             years[year] = 0
@@ -85,14 +84,16 @@ class Collection:
         return years
 
     def cited_by_year(self) -> dict[int, int]:
-        """
-        Returns a dictionary where the key is the year of publication and the value is the number of
-        citations in that year. The dictionary starts from the oldest article to the current year consecutively.
-        If a year has no citations the value will be zero.
+        """Return a dictionary with the citation count by year.
+
+        Returns a dictionary where the key is the year of publication and the
+        value is the number of citations in that year. The dictionary starts
+        from the oldest article to the current year consecutively. If a year has
+        no citations the value will be zero.
 
         :return: a dictionary with the number of citations each year.
         """
-        current_year = datetime.date.today().year
+        current_year = datetime.datetime.utcnow().year
         cited_items_per_year = {}
         for year in range(self._first_year, current_year + 1):
             cited_items_per_year[year] = 0

@@ -166,29 +166,31 @@ articles = [
 ]
 
 
-def test_published_by_year():
+def test_published_by_year() -> None:
+    """Test that we can get the number of articles published by year."""
     collection = Collection(articles=articles)
 
     res = collection.published_by_year()
-    assert res.get(2000) == 2
+    assert res.get(2000) == 2  # noqa: PLR2004
     assert res.get(2001) == 0
     assert res.get(2002) == 0
-    assert res.get(2005) == 2
-    assert res.get(2010) == 2
-    assert res.get(2021) == 2
+    assert res.get(2005) == 2  # noqa: PLR2004
+    assert res.get(2010) == 2  # noqa: PLR2004
+    assert res.get(2021) == 2  # noqa: PLR2004
     assert res.get(2022) == 1
     assert res.get(2023) == 0
 
 
-def test_cited_by_year():
+def test_cited_by_year() -> None:
+    """Test that we can get the number of citations by year."""
     collection = Collection(articles=articles)
 
     res = collection.cited_by_year()
-    assert res.get(2000) == 22
+    assert res.get(2000) == 22  # noqa: PLR2004
     assert res.get(2001) == 0
     assert res.get(2002) == 0
     assert res.get(2005) == 0
     assert res.get(2010) == 1
-    assert res.get(2021) == 12
-    assert res.get(2022) == 2
+    assert res.get(2021) == 12  # noqa: PLR2004
+    assert res.get(2022) == 2  # noqa: PLR2004
     assert res.get(2023) == 0

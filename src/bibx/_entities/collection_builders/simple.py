@@ -4,7 +4,7 @@ from bibx._entities.collection_builders.base import CollectionBuilder
 
 
 class SimpleCollectionBuilder(CollectionBuilder):
-    def __init__(self, articles: list[Article]):
+    def __init__(self, articles: list[Article]) -> None:
         self.articles = articles
 
     def build(self) -> Collection:
