@@ -4,7 +4,6 @@ from collections import defaultdict
 from collections.abc import Iterable
 from dataclasses import dataclass
 from functools import reduce
-from typing import cast
 
 import networkx as nx
 
@@ -52,7 +51,7 @@ class Collection:
             for id_ in rest:
                 graph.add_edge(first, id_)
                 id_to_article[id_].append(article)
-        components = cast(list[list[str]], list(nx.connected_components(graph)))
+        components = list(nx.connected_components(graph))
         biggest = max(components, key=len)
         smallest = min(components, key=len)
         logger.info(
