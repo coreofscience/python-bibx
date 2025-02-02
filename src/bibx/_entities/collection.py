@@ -61,7 +61,7 @@ class Collection:
             len(smallest),
         )
 
-        map_: dict[str, Article] = {}
+        article_by_id: dict[str, Article] = {}
         for ids in components:
             visited = set()
             articles = []
@@ -72,9 +72,9 @@ class Collection:
                     articles.append(article)
                     visited.add(id(article))
             merged = reduce(Article.merge, articles)
-            map_.update({id_: merged for id_ in ids})
+            article_by_id.update({id_: merged for id_ in ids})
 
-        return map_
+        return article_by_id
 
     @classmethod
     def deduplicate_articles(
