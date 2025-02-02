@@ -102,7 +102,8 @@ class ScopusRisCollectionBuilder(CollectionBuilder):
         doi, _ = cls._find_doi(scopusref)
         if not authors or not year:
             raise MissingCriticalInformationError()
-        article = Article(
+        return Article(
+            label=scopusref,
             ids=set() if doi is None else {f"doi:{doi}"},
             authors=[f"{first_name} {last_name.replace(' ', '').replace('.', '')}"],
             year=int(year),
@@ -114,9 +115,7 @@ class ScopusRisCollectionBuilder(CollectionBuilder):
             volume=volume_info.get("volume"),
             page=volume_info.get("page"),
             doi=doi,
-        )
-        article.add_simple_id()
-        return article
+        ).add_simple_id()
 
     @classmethod
     def _parse_references(cls, refs: list[str]) -> list[Article]:
@@ -134,7 +133,6 @@ class ScopusRisCollectionBuilder(CollectionBuilder):
     def _ris_to_dict(record: str) -> dict[str, list[str]]:
         parsed = defaultdict(list)
         current = None
-
         for line in record.split("\n"):
             match = _RIS_PATTERN.match(line)
             if not match:
@@ -163,25 +161,29 @@ class ScopusRisCollectionBuilder(CollectionBuilder):
         authors = data.get("AU", [])
         if not authors or not year:
             raise MissingCriticalInformationError()
-        doi = data.get("DO")
-        article = Article(
-            ids=set() if doi is None else {f"doi:{doi}"},
-            title=_joined(data.get("TI")),
-            authors=authors,
-            year=year,
-            journal=_joined(data.get("J2")),
-            volume=_joined(data.get("VL")),
-            issue=_joined(data.get("IS")),
-            page=_joined(data.get("SP")),
-            doi=_joined(data.get("DO")),
-            keywords=data.get("KW", []),
-            references=cls._parse_references(data.get("N1:References", [])),
-            sources={"scopus"},
-            extra=data,
-            times_cited=times_cited,
+        doi_list = data.get("DO")
+        doi = doi_list[0] if doi_list else None
+        return (
+            Article(
+                label=doi or "replaceme",
+                ids=set() if doi is None else {f"doi:{doi}"},
+                title=_joined(data.get("TI")),
+                authors=authors,
+                year=year,
+                journal=_joined(data.get("J2")),
+                volume=_joined(data.get("VL")),
+                issue=_joined(data.get("IS")),
+                page=_joined(data.get("SP")),
+                doi=doi,
+                keywords=data.get("KW", []),
+                references=cls._parse_references(data.get("N1:References", [])),
+                sources={"scopus"},
+                extra=data,
+                times_cited=times_cited,
+            )
+            .add_simple_id()
+            .set_simple_label()
         )
-        article.add_simple_id()
-        return article
 
     @classmethod
     def _parse_file(cls, file: TextIO) -> Iterable[Article]:

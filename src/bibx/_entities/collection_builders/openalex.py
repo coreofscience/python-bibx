@@ -75,6 +75,7 @@ class OpenAlexCollectionBuilder(CollectionBuilder):
     @classmethod
     def _work_to_article(cls, work: Work) -> Article:
         article = Article(
+            label=work.id,
             ids={
                 f"{source}:{id_}"
                 if source != "doi"
@@ -93,7 +94,6 @@ class OpenAlexCollectionBuilder(CollectionBuilder):
             issue=work.biblio.issue,
             page=work.biblio.first_page,
             doi=cls._extract_doi(work.doi) if work.doi else None,
-            _label=work.id,
             _permalink=work.primary_location and work.primary_location.landing_page_url,
             times_cited=work.cited_by_count,
             references=[cls._reference_to_article(r) for r in work.referenced_works],
@@ -108,6 +108,7 @@ class OpenAlexCollectionBuilder(CollectionBuilder):
     @staticmethod
     def _reference_to_article(reference: str) -> Article:
         return Article(
+            label=reference,
             ids={f"openalex:{reference}"},
             _permalink=reference,
             sources={"openalex"},
