@@ -161,6 +161,8 @@ class ScopusRisCollectionBuilder(CollectionBuilder):
         year = _int_or_nothing(data.get("PY", []))
         times_cited = _int_or_nothing(data.get("TC"))
         authors = data.get("AU", [])
+        if not authors or not year:
+            raise MissingCriticalInformationError()
         doi = data.get("DO")
         article = Article(
             ids=set() if doi is None else {f"doi:{doi}"},

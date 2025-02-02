@@ -6,7 +6,14 @@ import networkx as nx
 import typer
 from rich import print as rprint
 
-from bibx import Collection, read_any, read_scopus_bib, read_scopus_ris, read_wos
+from bibx import (
+    Collection,
+    query_openalex,
+    read_any,
+    read_scopus_bib,
+    read_scopus_ris,
+    read_wos,
+)
 from bibx.algorithms.preprocess import Preprocess
 from bibx.algorithms.sap import Sap
 
@@ -63,6 +70,17 @@ def sap(filename: str) -> None:
 
     s = Sap()
     graph = s.create_graph(collection)
+    graph = s.clean_graph(graph)
+    graph = s.tree(graph)
+    rprint(graph)
+
+
+@app.command()
+def openalex(query: list[str]) -> None:
+    """Run the sap algorithm on a seed file of any supported format."""
+    c = query_openalex(" ".join(query))
+    s = Sap()
+    graph = s.create_graph(c)
     graph = s.clean_graph(graph)
     graph = s.tree(graph)
     rprint(graph)

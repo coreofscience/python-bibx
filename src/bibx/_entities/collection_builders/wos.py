@@ -261,7 +261,7 @@ class WosCollectionBuilder(CollectionBuilder):
         for file in self._files:
             articles_as_str = file.read().split("\n\n")
             for article_as_str in articles_as_str:
-                if article_as_str != "ER" and article_as_str:
+                if article_as_str.strip() not in ("ER", "EF") and article_as_str:
                     # Strip `\n` at the end of the article so we don't trip
                     yield article_as_str.strip()
 
@@ -332,7 +332,7 @@ class WosCollectionBuilder(CollectionBuilder):
             title=processed.get("title"),
             authors=processed.get("authors", []),
             # FIXME: Year is required here
-            year=int(processed.get("year", 1999)),
+            year=processed.get("year", 1999),
             journal=processed.get("source_abbreviation"),
             volume=processed.get("volume"),
             page=processed.get("beginning_page"),

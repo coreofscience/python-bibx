@@ -1,6 +1,6 @@
 from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Optional, TypeVar
+from typing import Optional, TypeVar, Union
 
 T = TypeVar("T")
 
@@ -89,3 +89,22 @@ class Article:
         if self.simple_id is None:
             return
         self.ids.add(f"simple:{self.simple_id}")
+
+    def info(
+        self,
+    ) -> dict[str, Union[str, int, Optional[str], Optional[int], list[str]]]:
+        return {
+            "permalink": self.permalink,
+            "label": self.label,
+            "authors": self.authors,
+            "year": self.year,
+            "title": self.title,
+            "journal": self.journal,
+            "volume": self.volume,
+            "issue": self.issue,
+            "page": self.page,
+            "doi": self.doi,
+            "times_cited": self.times_cited,
+            "keywords": self.keywords,
+            "sources": list(self.sources),
+        }

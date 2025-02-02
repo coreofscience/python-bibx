@@ -1,4 +1,3 @@
-import dataclasses
 import logging
 from typing import Any, cast
 
@@ -32,7 +31,7 @@ def _limit(attribute: list[tuple[Any, int]], _max: int) -> list[tuple[Any, int]]
 
 
 def _add_article_info(g: nx.DiGraph, article: Article) -> None:
-    for key, val in dataclasses.asdict(article).items():
+    for key, val in article.info().items():
         if key in ("sources", "references") or key.startswith("_"):
             continue
         try:
@@ -306,7 +305,9 @@ class Sap:
             potential_branch = [
                 (n, g.nodes[n][YEAR])
                 for n in branch
-                if g.nodes[n][ROOT] == 0 and g.nodes[n][TRUNK] == 0
+                if g.nodes[n][ROOT] == 0
+                and g.nodes[n][TRUNK] == 0
+                and g.nodes[n][YEAR] is not None
             ]
             potential_branch = _limit(potential_branch, self.max_branch_size)
             for node, _ in potential_branch:
