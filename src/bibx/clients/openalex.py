@@ -155,7 +155,7 @@ class OpenAlexClient:
                     "fetched %d works in page %d", len(work_response.results), page
                 )
                 results.extend(work_response.results)
-                if page * MAX_WORKS_PER_PAGE >= work_response.meta.count:
+                if page * MAX_WORKS_PER_PAGE >= min(work_response.meta.count, limit):
                     break
             except (requests.RequestException, ValidationError) as error:
                 raise OpenAlexError(str(error)) from error
