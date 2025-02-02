@@ -3,6 +3,7 @@ from bibx._entities.collection import Collection
 
 articles = [
     Article(
+        label="doi:1",
         ids={"doi:1"},
         authors=["A"],
         year=2010,
@@ -16,9 +17,9 @@ articles = [
         keywords=[],
         sources=set(),
         extra={},
-        _label=None,
     ),
     Article(
+        label="doi:12",
         ids={"doi:12"},
         authors=["B"],
         year=2000,
@@ -32,9 +33,9 @@ articles = [
         keywords=[],
         sources=set(),
         extra={},
-        _label=None,
     ),
     Article(
+        label="doi:13",
         ids={"doi:13"},
         authors=["C"],
         year=2021,
@@ -48,9 +49,9 @@ articles = [
         keywords=[],
         sources=set(),
         extra={},
-        _label=None,
     ),
     Article(
+        label="doi:14",
         ids={"doi:14"},
         authors=["D"],
         year=2022,
@@ -64,9 +65,9 @@ articles = [
         keywords=[],
         sources=set(),
         extra={},
-        _label=None,
     ),
     Article(
+        label="doi:15",
         ids={"doi:15"},
         authors=["E"],
         year=2005,
@@ -80,9 +81,9 @@ articles = [
         keywords=[],
         sources=set(),
         extra={},
-        _label=None,
     ),
     Article(
+        label="doi:16",
         ids={"doi:16"},
         authors=["F"],
         year=2005,
@@ -96,9 +97,9 @@ articles = [
         keywords=[],
         sources=set(),
         extra={},
-        _label=None,
     ),
     Article(
+        label="doi:17",
         ids={"doi:17"},
         authors=["J"],
         year=2010,
@@ -112,9 +113,9 @@ articles = [
         keywords=[],
         sources=set(),
         extra={},
-        _label=None,
     ),
     Article(
+        label="doi:18",
         ids={"doi:18"},
         authors=["H"],
         year=2000,
@@ -128,9 +129,9 @@ articles = [
         keywords=[],
         sources=set(),
         extra={},
-        _label=None,
     ),
     Article(
+        label="doi:19",
         ids={"doi:19"},
         authors=["I"],
         year=2021,
@@ -143,9 +144,9 @@ articles = [
         keywords=[],
         sources=set(),
         extra={},
-        _label=None,
     ),
     Article(
+        label="doi:19",
         ids={"doi:19"},
         authors=["I"],
         year=None,
@@ -158,9 +159,9 @@ articles = [
         keywords=[],
         sources=set(),
         extra={},
-        _label=None,
     ),
     Article(
+        label="doi:19",
         ids={"doi:19"},
         authors=["I"],
         title="Ii",
@@ -172,7 +173,6 @@ articles = [
         keywords=[],
         sources=set(),
         extra={},
-        _label=None,
     ),
 ]
 

@@ -41,24 +41,29 @@ class ScopusBibCollectionBuilder(CollectionBuilder):
         doi = entry.get("doi")
         if doi is not None:
             ids.add(f"doi:{doi}")
-        article = Article(
-            ids=ids,
-            authors=entry["author"].split(" and "),
-            year=int(entry["year"]),
-            title=entry.get("title"),
-            journal=entry.get("journal"),
-            volume=entry.get("volume"),
-            issue=entry.get("issue"),
-            page=entry.get("art_number"),
-            doi=entry.get("doi"),
-            references=list(self._articles_from_references(entry.get("references"))),
-            keywords=entry.get("keywords", "").split("; "),
-            extra=entry,
-            sources={json.dumps(entry)},
-            times_cited=times_cited,
+        return (
+            Article(
+                label=doi or entry.get("title", "replaceme"),
+                ids=ids,
+                authors=entry["author"].split(" and "),
+                year=int(entry["year"]),
+                title=entry.get("title"),
+                journal=entry.get("journal"),
+                volume=entry.get("volume"),
+                issue=entry.get("issue"),
+                page=entry.get("art_number"),
+                doi=entry.get("doi"),
+                references=list(
+                    self._articles_from_references(entry.get("references"))
+                ),
+                keywords=entry.get("keywords", "").split("; "),
+                extra=entry,
+                sources={json.dumps(entry)},
+                times_cited=times_cited,
+            )
+            .add_simple_id()
+            .set_simple_label()
         )
-        article.add_simple_id()
-        return article
 
     def _articles_from_references(self, references: Optional[str]) -> Iterable[Article]:
         if references is None:
@@ -76,13 +81,11 @@ class ScopusBibCollectionBuilder(CollectionBuilder):
         author = reference.split(",", maxsplit=2)[0].strip()
         match = re.search(r"(10.\d{4,9}/[-._;()/:A-Z0-9]+)", reference)
         doi = match.groups()[0] if match else None
-        article = Article(
+        return Article(
+            label=reference,
             ids=set() if doi is None else {f"doi:{doi}"},
             authors=[author],
             year=year,
-            _label=reference,
             doi=doi,
             sources={reference},
-        )
-        article.add_simple_id()
-        return article
+        ).add_simple_id()

@@ -297,26 +297,29 @@ class WosCollectionBuilder(CollectionBuilder):
             article_data[field].append(parsed["value"])
         processed = cls._parse_all(dict(article_data))
         doi = processed.get("DOI")
-        article = Article(
-            ids=set() if doi is None else {f"doi:{doi}"},
-            authors=processed.get("authors", []),
-            year=processed.get("year"),
-            title=processed.get("title"),
-            journal=processed.get("source_abbreviation"),
-            volume=processed.get("volume"),
-            issue=processed.get("issue"),
-            page=processed.get("beginning_page"),
-            doi=doi,
-            times_cited=processed.get("times_cited"),
-            references=list(
-                cls._get_articles_from_references(processed.get("references"))
-            ),
-            keywords=processed.get("keywords", []),
-            extra=processed,
-            sources={article_as_str},
+        return (
+            Article(
+                label=doi or "replaceme",
+                ids=set() if doi is None else {f"doi:{doi}"},
+                authors=processed.get("authors", []),
+                year=processed.get("year"),
+                title=processed.get("title"),
+                journal=processed.get("source_abbreviation"),
+                volume=processed.get("volume"),
+                issue=processed.get("issue"),
+                page=processed.get("beginning_page"),
+                doi=doi,
+                times_cited=processed.get("times_cited"),
+                references=list(
+                    cls._get_articles_from_references(processed.get("references"))
+                ),
+                keywords=processed.get("keywords", []),
+                extra=processed,
+                sources={article_as_str},
+            )
+            .add_simple_id()
+            .set_simple_label()
         )
-        article.add_simple_id()
-        return article
 
     @classmethod
     def _parse_reference_from_str(cls, reference: str) -> Article:
@@ -327,8 +330,8 @@ class WosCollectionBuilder(CollectionBuilder):
         processed = cls._parse_all(data)
         doi = processed.get("DOI")
         article = Article(
+            label=reference,
             ids=set() if doi is None else {f"doi:{doi}"},
-            _label=reference,
             title=processed.get("title"),
             authors=processed.get("authors", []),
             # FIXME: Year is required here

@@ -9,8 +9,13 @@ def _keep(a: T, b: T) -> T:
     return a if a is not None else b
 
 
+def _keep_longest(a: str, b: str) -> str:
+    return a if len(a) > len(b) else b
+
+
 @dataclass
 class Article:
+    label: str
     ids: set[str]
     authors: list[str] = field(default_factory=list)
     year: Optional[int] = None
@@ -20,7 +25,6 @@ class Article:
     issue: Optional[str] = None
     page: Optional[str] = None
     doi: Optional[str] = None
-    _label: Optional[str] = None
     _permalink: Optional[str] = None
     times_cited: Optional[int] = None
     references: list["Article"] = field(default_factory=list)
@@ -31,6 +35,7 @@ class Article:
     def merge(self, other: "Article") -> "Article":
         """Merge two articles into a new one."""
         return Article(
+            label=_keep_longest(self.label, other.label),
             ids=self.ids.union(other.ids),
             authors=self.authors if self.authors else other.authors,
             year=_keep(self.year, other.year),
@@ -40,7 +45,6 @@ class Article:
             issue=_keep(self.issue, other.issue),
             page=_keep(self.page, other.page),
             doi=_keep(self.doi, other.doi),
-            _label=_keep(self._label, other._label),
             _permalink=_keep(self._permalink, other._permalink),
             times_cited=_keep(self.times_cited, other.times_cited),
             references=self.references or other.references,
@@ -54,17 +58,17 @@ class Article:
         return next(iter(sorted(self.ids)))
 
     @property
-    def label(self) -> str:
-        if self._label is not None:
-            return self._label
+    def simple_label(self) -> Optional[str]:
         pieces = {
-            "AU": self.authors[0].replace(",", "") if self.authors else "anonymous",
+            "AU": self.authors[0].replace(",", "") if self.authors else None,
             "PY": str(self.year) if self.year else None,
             "J9": str(self.journal) if self.journal else None,
             "VL": f"V{self.volume}" if self.volume else None,
             "BP": f"P{self.page}" if self.page else None,
             "DI": f"DOI {self.doi}" if self.doi else None,
         }
+        if not any(pieces.values()):
+            return None
         return ", ".join(value for value in pieces.values() if value)
 
     @property
@@ -85,10 +89,17 @@ class Article:
     def __repr__(self) -> str:
         return f"Article(ids={self.ids!r}, authors={self.authors!r})"
 
-    def add_simple_id(self) -> None:
+    def add_simple_id(self) -> "Article":
         if self.simple_id is None:
-            return
+            return self
         self.ids.add(f"simple:{self.simple_id}")
+        return self
+
+    def set_simple_label(self) -> "Article":
+        if self.simple_label is None:
+            return self
+        self.label = self.simple_label
+        return self
 
     def info(
         self,
