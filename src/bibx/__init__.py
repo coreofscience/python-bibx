@@ -25,7 +25,7 @@ __all__ = [
     "read_wos",
 ]
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 
 def query_openalex(query: str, limit: int = 600) -> Collection:
