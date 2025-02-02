@@ -1,4 +1,3 @@
-import dataclasses
 import logging
 from typing import Any, cast
 
@@ -17,19 +16,22 @@ LEAF_CONNECTIONS = "_leaf_connections"
 ELABORATE_SAP = "_elaborate_sap"
 ROOT_CONNECTIONS = "_root_connections"
 RAW_SAP = "_raw_sap"
+MIN_LEAF_CONNECTIONS = 3
+MAX_LEAF_AGE_YEARS = 7
+
 
 logger = logging.getLogger(__name__)
 
 
-def _limit(attribute: list[tuple[Any, int]], _max: int):
+def _limit(attribute: list[tuple[Any, int]], _max: int) -> list[tuple[Any, int]]:
     if _max is not None:
         sorted_attribute = sorted(attribute, key=lambda x: x[1], reverse=True)
         attribute = sorted_attribute[:_max]
     return attribute
 
 
-def _add_article_info(g: nx.DiGraph, article: Article):
-    for key, val in dataclasses.asdict(article).items():
+def _add_article_info(g: nx.DiGraph, article: Article) -> None:
+    for key, val in article.info().items():
         if key in ("sources", "references") or key.startswith("_"):
             continue
         try:
@@ -39,38 +41,37 @@ def _add_article_info(g: nx.DiGraph, article: Article):
 
 
 class Sap:
+    """Sap algorithm to classify nodes in a graph."""
+
     def __init__(
         self,
         max_roots: int = 20,
         max_leaves: int = 50,
         max_trunk: int = 20,
-        min_leaf_connections: int = 3,
-        max_leaf_age: int = 7,
         max_branch_size: int = 15,
-    ):
-        """
-        Create a Sap instance with the given parameters.
+    ) -> None:
+        """Create a Sap instance with the given parameters.
 
         :param max_roots: maximum number of roots on the tree
         :param max_leaves: maximum number of leaves on the tree
         :param max_trunk: maximum number of trunk nodes in the tree
-        :param min_leaf_connections: minimum number of connections between leaves and roots
+        :param min_leaf_connections: minimum number of connections between
+                                     leaves and roots
         :param max_leaf_age: maximum age for a leaf
         """
         self.max_roots = max_roots
         self.max_leaves = max_leaves
         self.max_trunk = max_trunk
-        self.min_leaf_connections = min_leaf_connections
-        self.max_leaf_age = max_leaf_age
         self.max_branch_size = max_branch_size
+        self.min_leaf_connections = MIN_LEAF_CONNECTIONS
+        self.max_leaf_age = MAX_LEAF_AGE_YEARS
 
     @staticmethod
     def create_graph(collection: Collection) -> nx.DiGraph:
-        """
-        Creates a `networkx.DiGraph` from a `Collection`.
+        """Create a `networkx.DiGraph` from a `Collection`.
 
-        It uses the article label as a key and adds all the properties of the article to
-        the graph.
+        It uses the article label as a key and adds all the properties of the
+        article to the graph.
 
         :param collection: a `bibx.Collection` instance.
         :return: a `networkx.DiGraph` instance.
@@ -87,8 +88,7 @@ class Sap:
 
     @staticmethod
     def clean_graph(g: nx.DiGraph) -> nx.DiGraph:
-        """
-        Clean a graph to make it ready for the sap algorithm.
+        """Clean a graph to make it ready for the sap algorithm.
 
         :param g: graph with unnecessary nodes
         :return: cleaned up giant component
@@ -99,11 +99,7 @@ class Sap:
 
         # Remove nodes that cite one element and are never cited themselves
         giant.remove_nodes_from(
-            [
-                n
-                for n in giant
-                if giant.in_degree(n) == 1 and giant.out_degree(n) == 0  # noqa  # noqa
-            ]
+            [n for n in giant if giant.in_degree(n) == 1 and giant.out_degree(n) == 0]
         )
 
         # Break loops
@@ -115,52 +111,47 @@ class Sap:
 
         return giant
 
-    def tree(self, graph: nx.DiGraph, clear: bool = False) -> nx.DiGraph:
-        """
-        Computes the whole tree.
-        """
+    def tree(self, graph: nx.DiGraph) -> nx.DiGraph:
+        """Compute the whole tree."""
         graph = cast(nx.DiGraph, graph.copy())
         graph = self._compute_root(graph)
         graph = self._compute_leaves(graph)
         graph = self._compute_sap(graph)
         graph = self._compute_trunk(graph)
-        graph = self._compute_branches(graph)
-        if clear:
-            graph = self._clear(graph)
-        return graph
+        return self._compute_branches(graph)
 
     def _compute_root(self, graph: nx.DiGraph) -> nx.DiGraph:
-        """
-        Takes in a connected graph and returns it labeled with a `root` property.
+        """Label a graph with the root property.
+
         :return: Labeled graph with the root property.
         """
         g = cast(nx.DiGraph, graph.copy())
         valid_roots = [
-            (n, cast(int, g.in_degree(n)))
-            for n in g.nodes
-            if g.out_degree(n) == 0  # noqa
+            (n, cast(int, g.in_degree(n))) for n in g.nodes if g.out_degree(n) == 0
         ]
         sorted_roots = _limit(valid_roots, self.max_roots)
-        nx.set_node_attributes(g, 0, ROOT)
+        nx.set_node_attributes(g, 0, ROOT)  # type: ignore
         for node, degree in sorted_roots:
             g.nodes[node][ROOT] = degree
         return g
 
     def _compute_leaves(self, graph: nx.DiGraph) -> nx.DiGraph:
-        """
-        Takes in a connected graph and returns it labeled with a `leaf` property.
+        """Label a graph with the leaf property.
+
         :param graph: Connected and filtered graph to work with.
         :return: Labeled graph with the leaf property.
         """
         g = cast(nx.DiGraph, graph.copy())
         try:
             roots = [n for n, d in g.nodes.items() if d[ROOT] > 0]
-        except AttributeError:
-            raise TypeError("It's necessary to have some roots")
+        except AttributeError as e:
+            message = "It's necessary to have a 'root' attribute"
+            raise TypeError(message) from e
         if not roots:
-            raise TypeError("It's necessary to have some roots")
+            message = "It's necessary to have some roots"
+            raise TypeError(message)
 
-        nx.set_node_attributes(g, 0, ROOT_CONNECTIONS)
+        nx.set_node_attributes(g, 0, ROOT_CONNECTIONS)  # type: ignore
         for node in roots:
             g.nodes[node][ROOT_CONNECTIONS] = 1
         topological_order = list(nx.topological_sort(g))
@@ -174,7 +165,7 @@ class Sap:
         potential_leaves = [
             (node, g.nodes[node][ROOT_CONNECTIONS])
             for node in g.nodes
-            if g.in_degree(node) == 0  # noqa
+            if g.in_degree(node) == 0
         ]
         extended_leaves = potential_leaves[:]
 
@@ -206,39 +197,56 @@ class Sap:
             potential_leaves = extended_leaves
 
         potential_leaves = _limit(potential_leaves, self.max_leaves)
-        nx.set_node_attributes(g, 0, LEAF)
+        nx.set_node_attributes(g, 0, LEAF)  # type: ignore
         for node, c in potential_leaves:
             g.nodes[node][LEAF] = c
         return g
 
     @staticmethod
-    def _compute_sap(graph: nx.DiGraph) -> nx.DiGraph:
-        """
-        Computes the sap of each node.
-        """
+    def _raw_sap(graph: nx.DiGraph) -> nx.DiGraph:
+        """Compute the raw sap of each node."""
         g = cast(nx.DiGraph, graph.copy())
         try:
             valid_root = [n for n, d in g.nodes.items() if d[ROOT] > 0]
-            valid_leaves = [n for n, d in g.nodes.items() if d[LEAF] > 0]
-        except AttributeError:
-            raise TypeError("The graph needs to have a 'root' and a 'leaf' attribute")
-        if not valid_root or not valid_leaves:
-            raise TypeError("The graph needs to have at least some roots and leafs")
+        except AttributeError as e:
+            message = "The graph needs to have a 'root' attribute"
+            raise TypeError(message) from e
+        if not valid_root:
+            message = "The graph needs to have at least some roots"
+            raise TypeError(message)
 
-        nx.set_node_attributes(g, 0, RAW_SAP)
-        nx.set_node_attributes(g, 0, ROOT_CONNECTIONS)
+        nx.set_node_attributes(g, 0, ROOT_CONNECTIONS)  # type: ignore
+        nx.set_node_attributes(g, 0, RAW_SAP)  # type: ignore
+
         for node in valid_root:
             g.nodes[node][RAW_SAP] = g.nodes[node][ROOT]
             g.nodes[node][ROOT_CONNECTIONS] = 1
         for node in reversed(list(nx.topological_sort(g))):
             neighbors = list(g.successors(node))
-            if neighbors:
-                for attr in (RAW_SAP, ROOT_CONNECTIONS):
-                    g.nodes[node][attr] = sum(g.nodes[nb][attr] for nb in neighbors)
+            if not neighbors:
+                continue
+            for attr in (RAW_SAP, ROOT_CONNECTIONS):
+                g.nodes[node][attr] = sum(g.nodes[nb][attr] for nb in neighbors)
 
-        nx.set_node_attributes(g, 0, ELABORATE_SAP)
-        nx.set_node_attributes(g, 0, LEAF_CONNECTIONS)
-        for node in valid_leaves:
+        return g
+
+    @staticmethod
+    def _elaborate_sap(graph: nx.DiGraph) -> nx.DiGraph:
+        """Compute the elaborate sap of each node."""
+        g = Sap._raw_sap(graph)
+
+        try:
+            valid_leaf = [n for n, d in g.nodes.items() if d[LEAF] > 0]
+        except AttributeError as e:
+            message = "The graph needs to have a 'leaf' attribute"
+            raise TypeError(message) from e
+        if not valid_leaf:
+            message = "The graph needs to have at least some leaves"
+            raise TypeError(message)
+
+        nx.set_node_attributes(g, 0, ELABORATE_SAP)  # type: ignore
+        nx.set_node_attributes(g, 0, LEAF_CONNECTIONS)  # type: ignore
+        for node in valid_leaf:
             g.nodes[node][ELABORATE_SAP] = g.nodes[node][LEAF]
             g.nodes[node][LEAF_CONNECTIONS] = 1
         for node in nx.topological_sort(g):
@@ -247,7 +255,15 @@ class Sap:
                 for attr in (ELABORATE_SAP, LEAF_CONNECTIONS):
                     g.nodes[node][attr] = sum(g.nodes[nb][attr] for nb in neighbors)
 
-        nx.set_node_attributes(g, 0, SAP)
+        return g
+
+    @staticmethod
+    def _compute_sap(graph: nx.DiGraph) -> nx.DiGraph:
+        """Compute the sap of each node."""
+        g = Sap._raw_sap(graph)
+        g = Sap._elaborate_sap(g)
+
+        nx.set_node_attributes(g, 0, SAP)  # type: ignore
         for node in g.nodes:
             g.nodes[node][SAP] = (
                 g.nodes[node][LEAF_CONNECTIONS] * g.nodes[node][RAW_SAP]
@@ -257,9 +273,7 @@ class Sap:
         return g
 
     def _compute_trunk(self, graph: nx.DiGraph) -> nx.DiGraph:
-        """
-        Tags leaves.
-        """
+        """Tags leaves."""
         g = cast(nx.DiGraph, graph.copy())
         try:
             potential_trunk = [
@@ -267,33 +281,33 @@ class Sap:
                 for n, d in g.nodes.items()
                 if d[ROOT] == 0 and d[LEAF] == 0 and d[SAP] > 0
             ]
-        except AttributeError:
-            raise TypeError(
-                "The graph needs to have a 'root', 'leaf' and 'sap' attributes"
-            )
+        except AttributeError as e:
+            message = "The graph needs to have a 'root', 'leaf' and 'sap' attributes"
+            raise TypeError(message) from e
         if not potential_trunk:
-            raise TypeError("The graph needs to have at least some nodes with sap")
+            message = "The graph needs to have at least some nodes with sap"
+            raise TypeError(message)
 
         potential_trunk = _limit(potential_trunk, self.max_trunk)
-        nx.set_node_attributes(g, 0, TRUNK)
+        nx.set_node_attributes(g, 0, TRUNK)  # type: ignore
         for node, sap in potential_trunk:
             g.nodes[node][TRUNK] = sap
         return g
 
     def _compute_branches(self, graph: nx.DiGraph) -> nx.DiGraph:
-        """
-        Tags branches.
-        """
+        """Tags branches."""
         g = cast(nx.DiGraph, graph.copy())
         undirected = g.to_undirected()
         communities: list[set] = louvain_communities(undirected)
-        branches = list(sorted(communities, key=len))[:3]
-        nx.set_node_attributes(g, 0, BRANCH)
+        branches = sorted(communities, key=len)[:3]
+        nx.set_node_attributes(g, 0, BRANCH)  # type: ignore
         for i, branch in enumerate(branches, start=1):
             potential_branch = [
                 (n, g.nodes[n][YEAR])
                 for n in branch
-                if g.nodes[n][ROOT] == 0 and g.nodes[n][TRUNK] == 0
+                if g.nodes[n][ROOT] == 0
+                and g.nodes[n][TRUNK] == 0
+                and g.nodes[n][YEAR] is not None
             ]
             potential_branch = _limit(potential_branch, self.max_branch_size)
             for node, _ in potential_branch:
@@ -301,10 +315,8 @@ class Sap:
         return g
 
     @staticmethod
-    def _clear(graph: nx.DiGraph) -> nx.DiGraph:
-        """
-        Returns a copy of the graph clear of untagged nodes.
-        """
+    def clear(graph: nx.DiGraph) -> nx.DiGraph:
+        """Return a copy of the graph clear of untagged nodes."""
         nodes = [
             n
             for n in graph.nodes

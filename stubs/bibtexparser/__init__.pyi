@@ -1,3 +1,6 @@
-from _typeshed import Incomplete
+from typing import TextIO
 
-def load(bibtex_file, parser: Incomplete | None = None): ...
+from _typeshed import Incomplete
+from bibtexparser.bparser import BibDatabase
+
+def load(bibtex_file: TextIO, parser: Incomplete | None = None) -> BibDatabase: ...

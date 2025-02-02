@@ -5,15 +5,15 @@ import re
 from collections.abc import Iterable, Mapping
 from contextlib import suppress
 from dataclasses import dataclass
-from typing import Any, Callable, Optional, TextIO
+from typing import Any, Callable, ClassVar, Optional, TextIO, Union
 
 from bibx._entities.article import Article
 from bibx._entities.collection import Collection
 from bibx._entities.collection_builders.base import CollectionBuilder
 from bibx.exceptions import (
     InvalidIsiLineError,
-    InvalidIsiReference,
-    MissingCriticalInformation,
+    InvalidIsiReferenceError,
+    MissingCriticalInformationError,
 )
 
 logger = logging.getLogger(__name__)
@@ -38,7 +38,8 @@ def _delimited(values: list[str], delimiter: str = "; ") -> list[str]:
 
 def _integer(values: list[str]) -> int:
     if len(values) > 1:
-        raise ValueError(f"Expected no more than one item and got {len(values)}")
+        message = f"Expected no more than one item and got {len(values)}"
+        raise ValueError(message)
 
     first, *_ = values
     return int(first.strip())
@@ -51,7 +52,7 @@ class IsiField:
     parser: Callable
     aliases: list[str]
 
-    def parse(self, value: list[str]):
+    def parse(self, value: list[str]) -> Union[str, int, list[str]]:
         return self.parser(value)
 
 
@@ -70,7 +71,7 @@ class WosCollectionBuilder(CollectionBuilder):
         re.X,
     )
 
-    FIELDS = {
+    FIELDS: ClassVar = {
         "AB": IsiField("AB", "Abstract", _joined, ["abstract"]),
         "AF": IsiField("AF", "Author Full Names", _ident, ["author_full_names"]),
         "AR": IsiField("AR", "Article Number", _joined, ["article_number"]),
@@ -247,7 +248,7 @@ class WosCollectionBuilder(CollectionBuilder):
         ),
     }
 
-    def __init__(self, *isi_files: TextIO):
+    def __init__(self, *isi_files: TextIO) -> None:
         self._files = isi_files
         for file in self._files:
             file.seek(0)
@@ -260,13 +261,13 @@ class WosCollectionBuilder(CollectionBuilder):
         for file in self._files:
             articles_as_str = file.read().split("\n\n")
             for article_as_str in articles_as_str:
-                if article_as_str != "ER" and article_as_str:
+                if article_as_str.strip() not in ("ER", "EF") and article_as_str:
                     # Strip `\n` at the end of the article so we don't trip
                     yield article_as_str.strip()
 
     def _get_articles_from_files(self) -> Iterable[Article]:
         for article_as_str in self._get_articles_as_str_from_files():
-            with suppress(MissingCriticalInformation):
+            with suppress(MissingCriticalInformationError):
                 article = self._parse_article_from_str(article_as_str)
                 yield article
 
@@ -277,7 +278,7 @@ class WosCollectionBuilder(CollectionBuilder):
         if not references:
             return
         for ref_str in references:
-            with suppress(InvalidIsiReference):
+            with suppress(InvalidIsiReferenceError):
                 yield cls._parse_reference_from_str(ref_str)
 
     @classmethod
@@ -294,10 +295,10 @@ class WosCollectionBuilder(CollectionBuilder):
             if not field or "value" not in parsed or parsed["value"] is None:
                 continue
             article_data[field].append(parsed["value"])
-
         processed = cls._parse_all(dict(article_data))
-
-        return Article(
+        doi = processed.get("DOI")
+        article = Article(
+            ids=set() if doi is None else {f"doi:{doi}"},
             authors=processed.get("authors", []),
             year=processed.get("year"),
             title=processed.get("title"),
@@ -305,7 +306,7 @@ class WosCollectionBuilder(CollectionBuilder):
             volume=processed.get("volume"),
             issue=processed.get("issue"),
             page=processed.get("beginning_page"),
-            doi=processed.get("DOI"),
+            doi=doi,
             times_cited=processed.get("times_cited"),
             references=list(
                 cls._get_articles_from_references(processed.get("references"))
@@ -314,15 +315,19 @@ class WosCollectionBuilder(CollectionBuilder):
             extra=processed,
             sources={article_as_str},
         )
+        article.add_simple_id()
+        return article
 
     @classmethod
     def _parse_reference_from_str(cls, reference: str) -> Article:
         match = cls.ISI_CITATION_PATTERN.match(reference)
         if not match:
-            raise InvalidIsiReference(reference)
+            raise InvalidIsiReferenceError(reference)
         data = {key: [value] for key, value in match.groupdict().items() if value}
         processed = cls._parse_all(data)
-        return Article(
+        doi = processed.get("DOI")
+        article = Article(
+            ids=set() if doi is None else {f"doi:{doi}"},
             _label=reference,
             title=processed.get("title"),
             authors=processed.get("authors", []),
@@ -336,6 +341,8 @@ class WosCollectionBuilder(CollectionBuilder):
             sources={reference},
             times_cited=processed.get("times_cited"),
         )
+        article.add_simple_id()
+        return article
 
     @classmethod
     def _parse_all(cls, article_data: dict[str, list[str]]) -> Mapping[str, Any]:
@@ -355,5 +362,5 @@ class WosCollectionBuilder(CollectionBuilder):
             parsed_value = field.parse(value)
             return {new_key: parsed_value for new_key in [field.key, *field.aliases]}
 
-        logger.debug(f"Found an unknown field with key {key} and value {value}")
+        logger.debug("Found an unknown field with key %s and value %s", key, value)
         return {key: _ident(value)}

@@ -9,38 +9,40 @@ import bibtexparser
 from bibx._entities.article import Article
 from bibx._entities.collection import Collection
 from bibx._entities.collection_builders.base import CollectionBuilder
-from bibx.exceptions import MissingCriticalInformation
+from bibx.exceptions import MissingCriticalInformationError
 
 
 class ScopusBibCollectionBuilder(CollectionBuilder):
-    def __init__(self, *scopus_files: TextIO):
+    def __init__(self, *scopus_files: TextIO) -> None:
         self._files = scopus_files
         for file in self._files:
             file.seek(0)
 
     def build(self) -> Collection:
         articles = self._get_articles_from_files()
-        return Collection(list(articles))
+        return Collection(Collection.deduplicate_articles(list(articles)))
 
     def _get_articles_from_files(self) -> Iterable[Article]:
         for file in self._files:
             db = bibtexparser.load(file)
             for entry in db.entries:
-                with suppress(MissingCriticalInformation):
+                with suppress(MissingCriticalInformationError):
                     yield self._article_from_entry(entry)
 
     def _article_from_entry(self, entry: dict) -> Article:
         if "author" not in entry or "year" not in entry:
-            raise MissingCriticalInformation()
+            raise MissingCriticalInformationError()
         if "note" in entry:
             match = re.search(r"cited By (\d+)", entry["note"], re.IGNORECASE)
-            if match:
-                times_cited = int(match.groups()[0])
-            else:
-                times_cited = None
+            times_cited = int(match.groups()[0]) if match else None
         else:
             times_cited = None
-        return Article(
+        ids = set()
+        doi = entry.get("doi")
+        if doi is not None:
+            ids.add(f"doi:{doi}")
+        article = Article(
+            ids=ids,
             authors=entry["author"].split(" and "),
             year=int(entry["year"]),
             title=entry.get("title"),
@@ -55,26 +57,32 @@ class ScopusBibCollectionBuilder(CollectionBuilder):
             sources={json.dumps(entry)},
             times_cited=times_cited,
         )
+        article.add_simple_id()
+        return article
 
     def _articles_from_references(self, references: Optional[str]) -> Iterable[Article]:
         if references is None:
             references = ""
         for reference in references.split("; "):
-            with suppress(MissingCriticalInformation):
+            with suppress(MissingCriticalInformationError):
                 yield self._article_from_reference(reference)
 
     @staticmethod
     def _article_from_reference(reference: str) -> Article:
         match = re.search(r"\((\d{4})\)", reference)
         if not match:
-            raise MissingCriticalInformation()
+            raise MissingCriticalInformationError()
         year = int(match.groups()[0])
         author = reference.split(",", maxsplit=2)[0].strip()
-        doi = re.search(r"(10.\d{4,9}/[-._;()/:A-Z0-9]+)", reference)
-        return Article(
+        match = re.search(r"(10.\d{4,9}/[-._;()/:A-Z0-9]+)", reference)
+        doi = match.groups()[0] if match else None
+        article = Article(
+            ids=set() if doi is None else {f"doi:{doi}"},
             authors=[author],
             year=year,
             _label=reference,
-            doi=doi.groups()[0] if doi else None,
+            doi=doi,
             sources={reference},
         )
+        article.add_simple_id()
+        return article

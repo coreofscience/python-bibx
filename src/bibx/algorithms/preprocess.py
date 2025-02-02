@@ -1,6 +1,4 @@
-"""
-Algorithms for preprocessing the data.
-"""
+"""Algorithms for preprocessing the data."""
 
 from typing import Optional
 
@@ -13,18 +11,22 @@ from .sap import BRANCH, LEAF, ROOT, TRUNK, Sap
 
 
 class Preprocess:
+    """Preprocess the data."""
+
     def __init__(self, wos: Collection, scopus: Collection) -> None:
         self.wos = wos
         self.scopus = scopus
         self._merged: Optional[Collection] = None
 
     @property
-    def merged(self):
+    def merged(self) -> Collection:
+        """Merge the collections."""
         if self._merged is None:
             self._merged = self.wos.merge(self.scopus)
         return self._merged
 
     def __repr__(self) -> str:
+        """Return the representation of the object."""
         return f"{self.__class__.__name__}(wos={self.wos}, scopus={self.scopus})"
 
     def _write_collection_to_workseet(
@@ -61,15 +63,19 @@ class Preprocess:
             workseet.write(i, 9, row.label)
 
     def write_merged_information(self, workseet: Worksheet) -> None:
+        """Write the merged information to a worksheet."""
         self._write_collection_to_workseet(self.merged, workseet)
 
     def write_wos_information(self, workseet: Worksheet) -> None:
+        """Write the WOS information to a worksheet."""
         self._write_collection_to_workseet(self.wos, workseet)
 
     def write_scopus_information(self, workseet: Worksheet) -> None:
+        """Write the Scopus information to a worksheet."""
         self._write_collection_to_workseet(self.scopus, workseet)
 
     def write_reference_information(self, workseet: Worksheet) -> None:
+        """Write the reference information to a worksheet."""
         for i, title in enumerate(
             [
                 "SR",
@@ -95,6 +101,7 @@ class Preprocess:
                 row += 1
 
     def write_journal_information(self, workseet: Worksheet) -> None:
+        """Write the journal information to the worksheet."""
         for i, title in enumerate(
             [
                 "Label",
@@ -116,6 +123,7 @@ class Preprocess:
                 row += 1
 
     def write_author_information(self, workseet: Worksheet) -> None:
+        """Write the author information to the worksheet."""
         for i, title in enumerate(
             [
                 "Author",
@@ -137,6 +145,7 @@ class Preprocess:
                         row += 1
 
     def write_times_cited_information(self, workseet: Worksheet) -> None:
+        """Write the times cited information to the worksheet."""
         for i, title in enumerate(
             [
                 "Year",
@@ -156,15 +165,16 @@ class Preprocess:
     def _get_tos(data: dict) -> str:
         if data[ROOT] > 0:
             return "Root"
-        elif data[TRUNK] > 0:
+        if data[TRUNK] > 0:
             return "Trunk"
-        elif data[LEAF] > 0:
+        if data[LEAF] > 0:
             return "Leaf"
-        elif data[BRANCH] > 0:
+        if data[BRANCH] > 0:
             return f"Branch {data[BRANCH]}"
         return "_"
 
     def write_tree_of_science_information(self, workseet: Worksheet) -> None:
+        """Write the tree of science information to the worksheet."""
         s = Sap()
         g = s.create_graph(self.merged)
         g = s.clean_graph(g)
@@ -208,6 +218,7 @@ class Preprocess:
             i += 1
 
     def create_workbook(self, filename: str) -> None:
+        """Create a workbook with the information."""
         workbook = Workbook(filename)
         self.write_merged_information(workbook.add_worksheet("Merged"))
         self.write_wos_information(workbook.add_worksheet("WOS"))

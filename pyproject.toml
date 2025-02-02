@@ -2,39 +2,108 @@
 name = "bibx"
 description = "Python bibliometric tools."
 authors = [
-    {name = "Core of Science Team", email = "technology@coreofscience.org"},
+    { name = "Core of Science Team", email = "technology@coreofscience.org" },
 ]
 license = "MIT"
 readme = "README.md"
-keywords = [
-    "bibliometrics",
-    "science",
-    "text mining",
-]
+keywords = ["bibliometrics", "science", "text mining"]
 dynamic = ["version"]
 dependencies = [
     "bibtexparser~=1.4.0",
     "networkx~=3.0",
+    "pydantic~=2.10.6",
+    "requests~=2.32.3",
     "typer[all]~=0.9.0",
     "xlsxwriter~=3.2.0",
 ]
 requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Text Processing",
+    "Typing :: Typed",
+]
 
-
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
-    "pytest~=7.2.0",
+    "pytest~=8.3.4",
     "pre-commit~=2.20.0",
-    "ruff~=0.3.3",
+    "ruff~=0.8.2",
     "mypy~=1.9.0",
+    "types-requests>=2.32.0.20241016",
+    "ipython>=8.18.1",
 ]
 
 [project.scripts]
 bibx = "bibx.cli:app"
 
 [tool.ruff.lint]
-select = ["I", "E", "F", "UP", "W"]
-ignore = ["E501"]
+select = [
+    "F",   # Pyflakes
+    "W",
+    "E",   # pycodestyle
+    "C90", # mccabe
+    "I",   # isort
+    "D",   # pydocstyle
+    "UP",  # pyupgrade
+    "N",   # pep8-naming
+    "YTT", # flake8-2020
+    "ANN", # flake8-annotations
+    "S",   # flake8-bandit
+    "BLE", # flake8-blind-except
+    "FBT", # flake8-boolean-trap
+    "B",   # flake8-bugbear
+    "A",   # flake8-builtins
+    "C4",  # flake8-comprehensions
+    "T10", # flake8-debugger
+    "EM",  # flake8-errmsg
+    "ISC", # flake8-implicit-str-concat
+    "ICN", # flake8-import-conventions
+    "G",   # flake8-logging-format
+    "T20", # flake8-print
+    "Q",   # flake8-quotes
+    "RET", # flake8-return
+    "SIM", # flake8-simplify
+    "TID", # flake8-tidy-imports
+    "TID", # flake8-tidy-imports
+    "DTZ", # flake8-datetimez
+    "ARG", # flake8-unused-arguments
+    "PGH", # pygrep-hooks
+    "PLC",
+    "PLE",
+    "PLR",
+    "PLW", # Pylint
+    "RUF", # Ruff-specific rules
+]
+ignore = [
+    "A002",
+    "B008",
+    "D100",
+    "D106",
+    "D107",
+    "D203",
+    "D213",
+    "D406",
+    "D407",
+    "DTZ003",
+    "FBT001",
+    "FBT003",
+    "ISC001",
+    "N815",
+    "PGH003",
+    "S101",
+    "T201",
+]
 
 [tool.mypy]
 mypy_path = "./stubs/"

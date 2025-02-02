@@ -4,8 +4,7 @@ from bibx.algorithms.sap import Sap
 
 
 def create_toy_graph() -> nx.DiGraph:
-    r"""
-    Creates a toy graph with known sap.
+    r"""Create a toy graph with known sap.
 
     The toy graph has the following shape:
 
@@ -15,7 +14,6 @@ def create_toy_graph() -> nx.DiGraph:
       / | \
     e   f   g
     """
-
     g = nx.DiGraph()
     for n in "abcdefg":
         # we need to have years for all the nodes
@@ -27,7 +25,8 @@ def create_toy_graph() -> nx.DiGraph:
     return g
 
 
-def test_sap():
+def test_sap() -> None:
+    """Test the sap algorithm with a toy graph."""
     g = create_toy_graph()
     s = Sap()
     g = s.tree(g)
