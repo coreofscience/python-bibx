@@ -92,7 +92,7 @@ class Article:
 
     def info(
         self,
-    ) -> dict[str, Union[str, int, Optional[str], Optional[int], list[str]]]:
+    ) -> dict[str, Union[str, int, list[str], None]]:
         return {
             "permalink": self.permalink,
             "label": self.label,
