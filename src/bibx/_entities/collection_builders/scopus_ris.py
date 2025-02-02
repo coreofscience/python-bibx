@@ -44,7 +44,7 @@ class ScopusRisCollectionBuilder(CollectionBuilder):
 
     def build(self) -> Collection:
         articles = self._get_articles_from_files()
-        return Collection(list(articles))
+        return Collection(Collection.deduplicate_articles(list(articles)))
 
     def _get_articles_from_files(self) -> Iterable[Article]:
         for file in self._files:
@@ -102,7 +102,8 @@ class ScopusRisCollectionBuilder(CollectionBuilder):
         doi, _ = cls._find_doi(scopusref)
         if not authors or not year:
             raise MissingCriticalInformationError()
-        return Article(
+        article = Article(
+            ids=set() if doi is None else {f"doi:{doi}"},
             authors=[f"{first_name} {last_name.replace(' ', '').replace('.', '')}"],
             year=int(year),
             journal=(
@@ -114,6 +115,8 @@ class ScopusRisCollectionBuilder(CollectionBuilder):
             page=volume_info.get("page"),
             doi=doi,
         )
+        article.add_simple_id()
+        return article
 
     @classmethod
     def _parse_references(cls, refs: list[str]) -> list[Article]:
@@ -158,7 +161,9 @@ class ScopusRisCollectionBuilder(CollectionBuilder):
         year = _int_or_nothing(data.get("PY", []))
         times_cited = _int_or_nothing(data.get("TC"))
         authors = data.get("AU", [])
-        return Article(
+        doi = data.get("DO")
+        article = Article(
+            ids=set() if doi is None else {f"doi:{doi}"},
             title=_joined(data.get("TI")),
             authors=authors,
             year=year,
@@ -173,6 +178,8 @@ class ScopusRisCollectionBuilder(CollectionBuilder):
             extra=data,
             times_cited=times_cited,
         )
+        article.add_simple_id()
+        return article
 
     @classmethod
     def _parse_file(cls, file: TextIO) -> Iterable[Article]:

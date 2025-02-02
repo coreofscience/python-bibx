@@ -28,3 +28,7 @@ class InvalidScopusFileError(BibXError, ValueError):
 
     def __init__(self) -> None:
         super().__init__("The file contains an invalid RIS line")
+
+
+class OpenAlexError(BibXError):
+    """Raised when we encounter an error with the OpenAlex API."""

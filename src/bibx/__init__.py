@@ -5,6 +5,7 @@ from typing import TextIO
 
 from bibx._entities.article import Article
 from bibx._entities.collection import Collection
+from bibx._entities.collection_builders.openalex import OpenAlexCollectionBuilder
 from bibx._entities.collection_builders.scopus_bib import ScopusBibCollectionBuilder
 from bibx._entities.collection_builders.scopus_ris import ScopusRisCollectionBuilder
 from bibx._entities.collection_builders.wos import WosCollectionBuilder
@@ -17,6 +18,7 @@ __all__ = [
     "Article",
     "Collection",
     "Sap",
+    "query_openalex",
     "read_any",
     "read_scopus_bib",
     "read_scopus_ris",
@@ -24,6 +26,11 @@ __all__ = [
 ]
 
 __version__ = "0.3.0"
+
+
+def query_openalex(query: str, limit: int = 600) -> Collection:
+    """Query OpenAlex and return a collection."""
+    return OpenAlexCollectionBuilder(query, limit).build()
 
 
 def read_scopus_bib(*files: TextIO) -> Collection:

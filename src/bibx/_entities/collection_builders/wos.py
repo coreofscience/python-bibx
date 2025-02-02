@@ -295,10 +295,10 @@ class WosCollectionBuilder(CollectionBuilder):
             if not field or "value" not in parsed or parsed["value"] is None:
                 continue
             article_data[field].append(parsed["value"])
-
         processed = cls._parse_all(dict(article_data))
-
-        return Article(
+        doi = processed.get("DOI")
+        article = Article(
+            ids=set() if doi is None else {f"doi:{doi}"},
             authors=processed.get("authors", []),
             year=processed.get("year"),
             title=processed.get("title"),
@@ -306,7 +306,7 @@ class WosCollectionBuilder(CollectionBuilder):
             volume=processed.get("volume"),
             issue=processed.get("issue"),
             page=processed.get("beginning_page"),
-            doi=processed.get("DOI"),
+            doi=doi,
             times_cited=processed.get("times_cited"),
             references=list(
                 cls._get_articles_from_references(processed.get("references"))
@@ -315,6 +315,8 @@ class WosCollectionBuilder(CollectionBuilder):
             extra=processed,
             sources={article_as_str},
         )
+        article.add_simple_id()
+        return article
 
     @classmethod
     def _parse_reference_from_str(cls, reference: str) -> Article:
@@ -323,12 +325,14 @@ class WosCollectionBuilder(CollectionBuilder):
             raise InvalidIsiReferenceError(reference)
         data = {key: [value] for key, value in match.groupdict().items() if value}
         processed = cls._parse_all(data)
-        return Article(
+        doi = processed.get("DOI")
+        article = Article(
+            ids=set() if doi is None else {f"doi:{doi}"},
             _label=reference,
             title=processed.get("title"),
             authors=processed.get("authors", []),
             # FIXME: Year is required here
-            year=processed.get("year", 1999),
+            year=int(processed.get("year", 1999)),
             journal=processed.get("source_abbreviation"),
             volume=processed.get("volume"),
             page=processed.get("beginning_page"),
@@ -337,6 +341,8 @@ class WosCollectionBuilder(CollectionBuilder):
             sources={reference},
             times_cited=processed.get("times_cited"),
         )
+        article.add_simple_id()
+        return article
 
     @classmethod
     def _parse_all(cls, article_data: dict[str, list[str]]) -> Mapping[str, Any]:

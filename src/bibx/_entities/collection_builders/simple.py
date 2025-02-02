@@ -8,4 +8,4 @@ class SimpleCollectionBuilder(CollectionBuilder):
         self.articles = articles
 
     def build(self) -> Collection:
-        return Collection(self.articles[:])
+        return Collection(Collection.deduplicate_articles(self.articles))

@@ -84,12 +84,11 @@ source={Scopus},
 """  # noqa: E501
     )
     data = read_scopus_bib(file)
-    assert len(data.articles) == 3  # noqa: PLR2004
+    assert len(data.articles) == 2  # noqa: PLR2004
     assert (
         data.articles[1].title
         == "Analysis of the energy distribution of iron nano-spheres for bit-patterned media"  # noqa: E501
     )
     assert data.articles[0].times_cited == 12  # noqa: PLR2004
     assert data.articles[1].times_cited == 0
-    assert data.articles[2].times_cited is None
-    assert len(list(data.citation_pairs)) == 49  # noqa: PLR2004
+    assert len(list(data.citation_pairs)) == 29  # noqa: PLR2004

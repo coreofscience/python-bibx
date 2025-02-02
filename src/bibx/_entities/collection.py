@@ -1,7 +1,12 @@
 import datetime
 import logging
+from collections import defaultdict
 from collections.abc import Iterable
 from dataclasses import dataclass
+from functools import reduce
+from typing import cast
+
+import networkx as nx
 
 from bibx._entities.article import Article
 
@@ -18,36 +23,97 @@ class Collection:
         :param other: collection to merge to.
         :return: a new collection object.
         """
-        keys = {a.key for a in self.articles}
-        merged = self.articles[:]
-        merged.extend(a for a in other.articles if a.key not in keys)
-        return Collection(merged)
+        all_articles = self.articles + other.articles
+        return Collection(self.deduplicate_articles(all_articles))
 
-    @property
-    def all_articles(self) -> Iterable[Article]:
-        """Yield all articles and references.
-
-        :return: an iterable over `Article`.
-        """
-        cache = {article.key: article for article in self.articles}
-        for article in self.articles:
+    @staticmethod
+    def _all_articles(articles: list[Article]) -> Iterable[Article]:
+        seen = set()
+        for article in articles:
+            if id(article) in seen:
+                continue
+            yield article
+            seen.add(id(article))
             for reference in article.references:
-                cache.setdefault(reference.key, reference)
-        yield from cache.values()
+                if id(reference) in seen:
+                    continue
+                yield reference
+                seen.add(id(reference))
+
+    @classmethod
+    def _uniqe_articles_by_id(cls, articles: list[Article]) -> dict[str, Article]:
+        graph = nx.Graph()
+        id_to_article: defaultdict[str, list[Article]] = defaultdict(list)
+        for article in cls._all_articles(articles):
+            first, *rest = article.ids
+            # Add a loop edge so that the unique articles are included
+            graph.add_edge(first, first)
+            id_to_article[first].append(article)
+            for id_ in rest:
+                graph.add_edge(first, id_)
+                id_to_article[id_].append(article)
+        components = cast(list[list[str]], list(nx.connected_components(graph)))
+        biggest = max(components, key=len)
+        smallest = min(components, key=len)
+        logger.info(
+            "Found %d components, biggest has %d articles, smallest has %d",
+            len(components),
+            len(biggest),
+            len(smallest),
+        )
+
+        map_: dict[str, Article] = {}
+        for ids in components:
+            visited = set()
+            articles = []
+            for id_ in ids:
+                for article in id_to_article[id_]:
+                    if id(article) in visited:
+                        continue
+                    articles.append(article)
+                    visited.add(id(article))
+            merged = reduce(Article.merge, articles)
+            map_.update({id_: merged for id_ in ids})
+
+        return map_
+
+    @classmethod
+    def deduplicate_articles(
+        cls,
+        articles: list[Article],
+    ) -> list[Article]:
+        article_by_id = cls._uniqe_articles_by_id(articles)
+
+        unique_articles: list[Article] = []
+        seen = set()
+        for article in articles:
+            if not article.ids:
+                continue
+            id_ = next(iter(article.ids))
+            unique = article_by_id[id_]
+            if id(unique) in seen:
+                continue
+            unique_articles.append(unique)
+            seen.add(id(unique))
+
+        for article in unique_articles:
+            new_references = []
+            for ref in article.references:
+                if not ref.ids:
+                    continue
+                id_ = next(iter(ref.ids))
+                new_references.append(article_by_id.get(id_, ref))
+            article.references = new_references
+
+        return unique_articles
 
     @property
     def citation_pairs(self) -> Iterable[tuple[Article, Article]]:
-        cache = {article.key: article for article in self.articles}
         for article in self.articles:
             if not article.references:
                 continue
             for reference in article.references:
-                # Yield a full article if we have the metadata for a citation
-                if article.key != reference.key and reference.key in cache:
-                    logger.debug("Found a cache hit for key %s", reference.key)
-                    yield article, cache[reference.key]
-                else:
-                    yield article, reference
+                yield article, reference
 
     @property
     def _first_year(self) -> int:

@@ -3,6 +3,7 @@ from bibx._entities.collection import Collection
 
 articles = [
     Article(
+        ids={"doi:1"},
         authors=["A"],
         year=2010,
         title="Aa",
@@ -18,6 +19,7 @@ articles = [
         _label=None,
     ),
     Article(
+        ids={"doi:12"},
         authors=["B"],
         year=2000,
         title="Bb",
@@ -33,6 +35,7 @@ articles = [
         _label=None,
     ),
     Article(
+        ids={"doi:13"},
         authors=["C"],
         year=2021,
         title="Cc",
@@ -48,6 +51,7 @@ articles = [
         _label=None,
     ),
     Article(
+        ids={"doi:14"},
         authors=["D"],
         year=2022,
         title="Dd",
@@ -63,6 +67,7 @@ articles = [
         _label=None,
     ),
     Article(
+        ids={"doi:15"},
         authors=["E"],
         year=2005,
         title="Ee",
@@ -78,6 +83,7 @@ articles = [
         _label=None,
     ),
     Article(
+        ids={"doi:16"},
         authors=["F"],
         year=2005,
         title="Ff",
@@ -93,6 +99,7 @@ articles = [
         _label=None,
     ),
     Article(
+        ids={"doi:17"},
         authors=["J"],
         year=2010,
         title="Jj",
@@ -108,6 +115,7 @@ articles = [
         _label=None,
     ),
     Article(
+        ids={"doi:18"},
         authors=["H"],
         year=2000,
         title="Hh",
@@ -123,6 +131,7 @@ articles = [
         _label=None,
     ),
     Article(
+        ids={"doi:19"},
         authors=["I"],
         year=2021,
         title="Ii",
@@ -137,6 +146,7 @@ articles = [
         _label=None,
     ),
     Article(
+        ids={"doi:19"},
         authors=["I"],
         year=None,
         title="Ii",
@@ -151,6 +161,7 @@ articles = [
         _label=None,
     ),
     Article(
+        ids={"doi:19"},
         authors=["I"],
         title="Ii",
         journal="Aii",

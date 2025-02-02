@@ -20,7 +20,7 @@ class ScopusBibCollectionBuilder(CollectionBuilder):
 
     def build(self) -> Collection:
         articles = self._get_articles_from_files()
-        return Collection(list(articles))
+        return Collection(Collection.deduplicate_articles(list(articles)))
 
     def _get_articles_from_files(self) -> Iterable[Article]:
         for file in self._files:
@@ -37,7 +37,12 @@ class ScopusBibCollectionBuilder(CollectionBuilder):
             times_cited = int(match.groups()[0]) if match else None
         else:
             times_cited = None
-        return Article(
+        ids = set()
+        doi = entry.get("doi")
+        if doi is not None:
+            ids.add(f"doi:{doi}")
+        article = Article(
+            ids=ids,
             authors=entry["author"].split(" and "),
             year=int(entry["year"]),
             title=entry.get("title"),
@@ -52,6 +57,8 @@ class ScopusBibCollectionBuilder(CollectionBuilder):
             sources={json.dumps(entry)},
             times_cited=times_cited,
         )
+        article.add_simple_id()
+        return article
 
     def _articles_from_references(self, references: Optional[str]) -> Iterable[Article]:
         if references is None:
@@ -67,11 +74,15 @@ class ScopusBibCollectionBuilder(CollectionBuilder):
             raise MissingCriticalInformationError()
         year = int(match.groups()[0])
         author = reference.split(",", maxsplit=2)[0].strip()
-        doi = re.search(r"(10.\d{4,9}/[-._;()/:A-Z0-9]+)", reference)
-        return Article(
+        match = re.search(r"(10.\d{4,9}/[-._;()/:A-Z0-9]+)", reference)
+        doi = match.groups()[0] if match else None
+        article = Article(
+            ids=set() if doi is None else {f"doi:{doi}"},
             authors=[author],
             year=year,
             _label=reference,
-            doi=doi.groups()[0] if doi else None,
+            doi=doi,
             sources={reference},
         )
+        article.add_simple_id()
+        return article
