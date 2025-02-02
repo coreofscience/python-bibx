@@ -4,7 +4,8 @@ from typing import Any, cast
 import networkx as nx
 from networkx.algorithms.community.louvain import louvain_communities
 
-from bibx import Article, Collection
+from bibx.article import Article
+from bibx.collection import Collection
 
 YEAR = "year"
 LEAF = "leaf"
