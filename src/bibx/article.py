@@ -15,6 +15,8 @@ def _keep_longest(a: str, b: str) -> str:
 
 @dataclass
 class Article:
+    """A scientific article."""
+
     label: str
     ids: set[str]
     authors: list[str] = field(default_factory=list)
@@ -55,10 +57,12 @@ class Article:
 
     @property
     def key(self) -> str:
+        """Return the first ID of the article."""
         return next(iter(sorted(self.ids)))
 
     @property
     def simple_label(self) -> Optional[str]:
+        """Return a simple label for the article."""
         pieces = {
             "AU": self.authors[0].replace(",", "") if self.authors else None,
             "PY": str(self.year) if self.year else None,
@@ -73,6 +77,7 @@ class Article:
 
     @property
     def permalink(self) -> Optional[str]:
+        """Return the permalink of the article."""
         if self._permalink is not None:
             return self._permalink
         if self.doi is not None:
@@ -81,21 +86,25 @@ class Article:
 
     @property
     def simple_id(self) -> Optional[str]:
+        """Return a simple ID for the article."""
         if self.authors and self.year is not None:
             author = self.authors[0].split(" ")[0].replace(",", "")
             return f"{author}{self.year}".lower()
         return None
 
     def __repr__(self) -> str:
+        """Return a string representation of the article."""
         return f"Article(ids={self.ids!r}, authors={self.authors!r})"
 
     def add_simple_id(self) -> "Article":
+        """Add a simple ID to the article."""
         if self.simple_id is None:
             return self
         self.ids.add(f"simple:{self.simple_id}")
         return self
 
     def set_simple_label(self) -> "Article":
+        """Set the simple label as the label of the article."""
         if self.simple_label is None:
             return self
         self.label = self.simple_label
@@ -104,6 +113,7 @@ class Article:
     def info(
         self,
     ) -> dict[str, Union[str, int, list[str], None]]:
+        """Return a dictionary with the information of the article."""
         return {
             "permalink": self.permalink,
             "label": self.label,

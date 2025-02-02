@@ -3,13 +3,13 @@
 import logging
 from typing import TextIO
 
-from bibx._entities.article import Article
-from bibx._entities.collection import Collection
-from bibx._entities.collection_builders.openalex import OpenAlexCollectionBuilder
-from bibx._entities.collection_builders.scopus_bib import ScopusBibCollectionBuilder
-from bibx._entities.collection_builders.scopus_ris import ScopusRisCollectionBuilder
-from bibx._entities.collection_builders.wos import WosCollectionBuilder
 from bibx.algorithms.sap import Sap
+from bibx.article import Article
+from bibx.builders.openalex import HandleReferences, OpenAlexCollectionBuilder
+from bibx.builders.scopus_bib import ScopusBibCollectionBuilder
+from bibx.builders.scopus_ris import ScopusRisCollectionBuilder
+from bibx.builders.wos import WosCollectionBuilder
+from bibx.collection import Collection
 from bibx.exceptions import BibXError
 
 logger = logging.getLogger(__name__)
@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 __all__ = [
     "Article",
     "Collection",
+    "HandleReferences",
     "Sap",
     "query_openalex",
     "read_any",
@@ -28,9 +29,13 @@ __all__ = [
 __version__ = "0.3.1"
 
 
-def query_openalex(query: str, limit: int = 600) -> Collection:
+def query_openalex(
+    query: str,
+    limit: int = 600,
+    references: HandleReferences = HandleReferences.BASIC,
+) -> Collection:
     """Query OpenAlex and return a collection."""
-    return OpenAlexCollectionBuilder(query, limit).build()
+    return OpenAlexCollectionBuilder(query, limit, references=references).build()
 
 
 def read_scopus_bib(*files: TextIO) -> Collection:

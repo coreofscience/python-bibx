@@ -5,7 +5,7 @@ from typing import Optional
 from xlsxwriter import Workbook
 from xlsxwriter.worksheet import Worksheet
 
-from bibx import Collection
+from bibx.collection import Collection
 
 from .sap import BRANCH, LEAF, ROOT, TRUNK, Sap
 

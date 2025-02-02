@@ -7,14 +7,15 @@ from contextlib import suppress
 from dataclasses import dataclass
 from typing import Any, Callable, ClassVar, Optional, TextIO, Union
 
-from bibx._entities.article import Article
-from bibx._entities.collection import Collection
-from bibx._entities.collection_builders.base import CollectionBuilder
+from bibx.article import Article
+from bibx.collection import Collection
 from bibx.exceptions import (
     InvalidIsiLineError,
     InvalidIsiReferenceError,
     MissingCriticalInformationError,
 )
+
+from .base import CollectionBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +47,7 @@ def _integer(values: list[str]) -> int:
 
 
 @dataclass(frozen=True)
-class IsiField:
+class _IsiField:
     key: str
     description: str
     parser: Callable
@@ -57,6 +58,8 @@ class IsiField:
 
 
 class WosCollectionBuilder(CollectionBuilder):
+    """Builder for collections of articles from Web of Science (WoS) ISI files."""
+
     ISI_LINE_PATTERN = re.compile(
         r"^(null|.)?((?P<field>[A-Z0-9]{2})|  )( (?P<value>.*))?$"
     )
@@ -72,175 +75,177 @@ class WosCollectionBuilder(CollectionBuilder):
     )
 
     FIELDS: ClassVar = {
-        "AB": IsiField("AB", "Abstract", _joined, ["abstract"]),
-        "AF": IsiField("AF", "Author Full Names", _ident, ["author_full_names"]),
-        "AR": IsiField("AR", "Article Number", _joined, ["article_number"]),
-        "AU": IsiField("AU", "Authors", _ident, ["authors"]),
-        "BA": IsiField("BA", "Book Authors", _ident, ["book_authors"]),
-        "BE": IsiField("BE", "Editors", _ident, ["editors"]),
-        "BF": IsiField(
+        "AB": _IsiField("AB", "Abstract", _joined, ["abstract"]),
+        "AF": _IsiField("AF", "Author Full Names", _ident, ["author_full_names"]),
+        "AR": _IsiField("AR", "Article Number", _joined, ["article_number"]),
+        "AU": _IsiField("AU", "Authors", _ident, ["authors"]),
+        "BA": _IsiField("BA", "Book Authors", _ident, ["book_authors"]),
+        "BE": _IsiField("BE", "Editors", _ident, ["editors"]),
+        "BF": _IsiField(
             "BF", "Book Authors Full Name", _ident, ["book_authors_full_name"]
         ),
-        "BN": IsiField(
+        "BN": _IsiField(
             "BN",
             "International Standard Book Number (ISBN)",
             _joined,
             ["international_standard_book_number"],
         ),
-        "BP": IsiField("BP", "Beginning Page", _joined, ["beginning_page"]),
-        "BS": IsiField("BS", "Book Series Subtitle", _joined, ["book_series_subtitle"]),
-        "C1": IsiField("C1", "Author Address", _ident, ["author_address"]),
-        "CA": IsiField("CA", "Group Authors", _ident, ["group_authors"]),
-        "CL": IsiField("CL", "Conference Location", _joined, ["conference_location"]),
-        "CR": IsiField(
+        "BP": _IsiField("BP", "Beginning Page", _joined, ["beginning_page"]),
+        "BS": _IsiField(
+            "BS", "Book Series Subtitle", _joined, ["book_series_subtitle"]
+        ),
+        "C1": _IsiField("C1", "Author Address", _ident, ["author_address"]),
+        "CA": _IsiField("CA", "Group Authors", _ident, ["group_authors"]),
+        "CL": _IsiField("CL", "Conference Location", _joined, ["conference_location"]),
+        "CR": _IsiField(
             "CR",
             "Cited References",
             _ident,
             ["cited_references", "references", "citations"],
         ),
-        "CT": IsiField(
+        "CT": _IsiField(
             "CT",
             "Conference Title",
             functools.partial(_joined, separator="\n"),
             ["conference_title"],
         ),
-        "CY": IsiField("CY", "Conference Date", _joined, ["conference_date"]),
-        "DE": IsiField("DE", "Author Keywords", _delimited, ["author_keywords"]),
-        "DI": IsiField(
+        "CY": _IsiField("CY", "Conference Date", _joined, ["conference_date"]),
+        "DE": _IsiField("DE", "Author Keywords", _delimited, ["author_keywords"]),
+        "DI": _IsiField(
             "DI",
             "Digital Object Identifier (DOI)",
             _joined,
             ["digital_object_identifier", "DOI"],
         ),
-        "DT": IsiField("DT", "Document Type", _joined, ["document_type"]),
-        "D2": IsiField(
+        "DT": _IsiField("DT", "Document Type", _joined, ["document_type"]),
+        "D2": _IsiField(
             "D2",
             "Book Digital Object Identifier (DOI)",
             _joined,
             ["book_digital_object_identifier"],
         ),
-        "ED": IsiField("ED", "Editors", _ident, ["editors"]),
-        "EM": IsiField("EM", "E-mail Address", _ident, ["email_address"]),
-        "EI": IsiField(
+        "ED": _IsiField("ED", "Editors", _ident, ["editors"]),
+        "EM": _IsiField("EM", "E-mail Address", _ident, ["email_address"]),
+        "EI": _IsiField(
             "EI",
             "Electronic International Standard Serial Number (eISSN)",
             _joined,
             ["eissn"],
         ),
-        "EP": IsiField("EP", "Ending Page", _joined, ["ending_page"]),
-        "FU": IsiField(
+        "EP": _IsiField("EP", "Ending Page", _joined, ["ending_page"]),
+        "FU": _IsiField(
             "FU",
             "Funding Agency and Grant Number",
             _delimited,
             ["funding_agency_and_grant_number"],
         ),
-        "FX": IsiField("FX", "Funding Text", _joined, ["funding_text"]),
-        "GA": IsiField(
+        "FX": _IsiField("FX", "Funding Text", _joined, ["funding_text"]),
+        "GA": _IsiField(
             "GA",
             "Document Delivery Number",
             _joined,
             ["document_delivery_number"],
         ),
-        "GP": IsiField("GP", "Book Group Authors", _ident, ["book_group_authors"]),
-        "HO": IsiField("HO", "Conference Host", _joined, ["conference_host"]),
-        "ID": IsiField(
+        "GP": _IsiField("GP", "Book Group Authors", _ident, ["book_group_authors"]),
+        "HO": _IsiField("HO", "Conference Host", _joined, ["conference_host"]),
+        "ID": _IsiField(
             "ID", "Keywords Plus", _delimited, ["keywords_plus", "keywords"]
         ),
-        "IS": IsiField("IS", "Issue", _joined, ["issue"]),
-        "J9": IsiField(
+        "IS": _IsiField("IS", "Issue", _joined, ["issue"]),
+        "J9": _IsiField(
             "J9",
             "29-Character Source Abbreviation",
             _joined,
             ["source_abbreviation"],
         ),
-        "JI": IsiField(
+        "JI": _IsiField(
             "JI", "ISO Source Abbreviation", _joined, ["iso_source_abbreviation"]
         ),
-        "LA": IsiField("LA", "Language", _joined, ["language"]),
-        "MA": IsiField("MA", "Meeting Abstract", _joined, ["meeting_abstract"]),
-        "NR": IsiField(
+        "LA": _IsiField("LA", "Language", _joined, ["language"]),
+        "MA": _IsiField("MA", "Meeting Abstract", _joined, ["meeting_abstract"]),
+        "NR": _IsiField(
             "NR", "Cited Reference Count", _integer, ["cited_reference_count"]
         ),
-        "OI": IsiField(
+        "OI": _IsiField(
             "OI",
             "ORCID Identifier (Open Researcher and Contributor ID)",
             _delimited,
             ["orcid_identifier"],
         ),
-        "P2": IsiField(
+        "P2": _IsiField(
             "P2",
             "Chapter count (Book Citation Index)",
             _integer,
             ["chapter_count"],
         ),
-        "PA": IsiField(
+        "PA": _IsiField(
             "PA",
             "Publisher Address",
             functools.partial(_joined, separator="\n"),
             ["publisher_address"],
         ),
-        "PD": IsiField("PD", "Publication Date", _joined, ["publication_date"]),
-        "PG": IsiField("PG", "Page Count", _integer, ["page_count"]),
-        "PI": IsiField("PI", "Publisher City", _joined, ["publisher_city"]),
-        "PM": IsiField("PM", "PubMed ID", _joined, ["pubmed_id"]),
-        "PN": IsiField("PN", "Part Number", _joined, ["part_number"]),
-        "PT": IsiField(
+        "PD": _IsiField("PD", "Publication Date", _joined, ["publication_date"]),
+        "PG": _IsiField("PG", "Page Count", _integer, ["page_count"]),
+        "PI": _IsiField("PI", "Publisher City", _joined, ["publisher_city"]),
+        "PM": _IsiField("PM", "PubMed ID", _joined, ["pubmed_id"]),
+        "PN": _IsiField("PN", "Part Number", _joined, ["part_number"]),
+        "PT": _IsiField(
             "PT",
             "Publication Type (J=Journal; B=Book; S=Series; P=Patent)",
             _joined,
             ["publication_type"],
         ),
-        "PU": IsiField("PU", "Publisher", _joined, ["publisher"]),
-        "PY": IsiField(
+        "PU": _IsiField("PU", "Publisher", _joined, ["publisher"]),
+        "PY": _IsiField(
             "PY",
             "Year Published",
             _integer,
             ["year_published", "year", "publication_year"],
         ),
-        "RI": IsiField(
+        "RI": _IsiField(
             "RI", "ResearcherID Number", _delimited, ["researcherid_number"]
         ),
-        "RP": IsiField("RP", "Reprint Address", _joined, ["reprint_address"]),
-        "SC": IsiField("SC", "Research Areas", _delimited, ["research_areas"]),
-        "SE": IsiField("SE", "Book Series Title", _joined, ["book_series_title"]),
-        "SI": IsiField("SI", "Special Issue", _joined, ["special_issue"]),
-        "SN": IsiField(
+        "RP": _IsiField("RP", "Reprint Address", _joined, ["reprint_address"]),
+        "SC": _IsiField("SC", "Research Areas", _delimited, ["research_areas"]),
+        "SE": _IsiField("SE", "Book Series Title", _joined, ["book_series_title"]),
+        "SI": _IsiField("SI", "Special Issue", _joined, ["special_issue"]),
+        "SN": _IsiField(
             "SN",
             "International Standard Serial Number (ISSN)",
             _joined,
             ["issn"],
         ),
-        "SO": IsiField("SO", "Publication Name", _joined, ["publication_name"]),
-        "SP": IsiField(
+        "SO": _IsiField("SO", "Publication Name", _joined, ["publication_name"]),
+        "SP": _IsiField(
             "SP",
             "Conference Sponsors",
             functools.partial(_delimited, delimiter=", "),
             ["conference_sponsors"],
         ),
-        "SU": IsiField("SU", "Supplement", _joined, ["supplement"]),
-        "TC": IsiField(
+        "SU": _IsiField("SU", "Supplement", _joined, ["supplement"]),
+        "TC": _IsiField(
             "TC",
             "Web of Science Core Collection Times Cited Count",
             _integer,
             ["wos_times_cited_count", "wos_times_cited"],
         ),
-        "TI": IsiField("TI", "Document Title", _joined, ["title"]),
-        "U1": IsiField("U1", "Usage Count (Last 180 Days)", _integer, ["usage_count"]),
-        "U2": IsiField("U2", "Usage Count (Since 2013)", _integer, ["usage_count"]),
-        "UT": IsiField(
+        "TI": _IsiField("TI", "Document Title", _joined, ["title"]),
+        "U1": _IsiField("U1", "Usage Count (Last 180 Days)", _integer, ["usage_count"]),
+        "U2": _IsiField("U2", "Usage Count (Since 2013)", _integer, ["usage_count"]),
+        "UT": _IsiField(
             "UT",
             "Unique Article Identifier",
             _joined,
             ["unique_article_identifier"],
         ),
-        "VL": IsiField("VL", "Volume", _joined, ["volume"]),
-        "WC": IsiField(
+        "VL": _IsiField("VL", "Volume", _joined, ["volume"]),
+        "WC": _IsiField(
             "WC",
             "Web of Science Categories",
             _delimited,
             ["web_of_science_categories"],
         ),
-        "Z9": IsiField(
+        "Z9": _IsiField(
             "Z9",
             "Total Times Cited Count (WoS Core, BCI, and CSCD)",
             _integer,
@@ -254,6 +259,7 @@ class WosCollectionBuilder(CollectionBuilder):
             file.seek(0)
 
     def build(self) -> Collection:
+        """Build a collection of articles from Web of Science (WoS) ISI files."""
         articles = self._get_articles_from_files()
         return Collection(list(articles))
 

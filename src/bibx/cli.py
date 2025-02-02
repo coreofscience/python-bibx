@@ -7,7 +7,6 @@ import typer
 from rich import print as rprint
 
 from bibx import (
-    Collection,
     query_openalex,
     read_any,
     read_scopus_bib,
@@ -16,6 +15,8 @@ from bibx import (
 )
 from bibx.algorithms.preprocess import Preprocess
 from bibx.algorithms.sap import Sap
+from bibx.builders.openalex import HandleReferences
+from bibx.collection import Collection
 
 app = typer.Typer()
 
@@ -76,9 +77,15 @@ def sap(filename: str) -> None:
 
 
 @app.command()
-def openalex(query: list[str]) -> None:
+def openalex(
+    query: list[str],
+    references: HandleReferences = typer.Option(
+        help="how to handle references",
+        default=HandleReferences.BASIC,
+    ),
+) -> None:
     """Run the sap algorithm on a seed file of any supported format."""
-    c = query_openalex(" ".join(query))
+    c = query_openalex(" ".join(query), references=references)
     s = Sap()
     graph = s.create_graph(c)
     graph = s.clean_graph(graph)

@@ -1,5 +1,5 @@
-from bibx._entities.article import Article
-from bibx._entities.collection import Collection
+from bibx.article import Article
+from bibx.collection import Collection
 
 articles = [
     Article(

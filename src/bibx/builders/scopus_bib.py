@@ -6,19 +6,23 @@ from typing import Optional, TextIO
 
 import bibtexparser
 
-from bibx._entities.article import Article
-from bibx._entities.collection import Collection
-from bibx._entities.collection_builders.base import CollectionBuilder
+from bibx.article import Article
+from bibx.collection import Collection
 from bibx.exceptions import MissingCriticalInformationError
+
+from .base import CollectionBuilder
 
 
 class ScopusBibCollectionBuilder(CollectionBuilder):
+    """Builder for collections of articles from Scopus BibTeX files."""
+
     def __init__(self, *scopus_files: TextIO) -> None:
         self._files = scopus_files
         for file in self._files:
             file.seek(0)
 
     def build(self) -> Collection:
+        """Build a collection of articles from Scopus BibTeX files."""
         articles = self._get_articles_from_files()
         return Collection(Collection.deduplicate_articles(list(articles)))
 

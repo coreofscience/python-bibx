@@ -4,10 +4,11 @@ from collections import defaultdict
 from collections.abc import Iterable
 from typing import Optional, TextIO
 
-from bibx._entities.article import Article
-from bibx._entities.collection import Collection
-from bibx._entities.collection_builders.base import CollectionBuilder
+from bibx.article import Article
+from bibx.collection import Collection
 from bibx.exceptions import InvalidScopusFileError, MissingCriticalInformationError
+
+from .base import CollectionBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -37,12 +38,15 @@ def _joined(raw: Optional[list[str]]) -> Optional[str]:
 
 
 class ScopusRisCollectionBuilder(CollectionBuilder):
+    """Builder for collections of articles from Scopus RIS files."""
+
     def __init__(self, *ris_files: TextIO) -> None:
         self._files = ris_files
         for file in self._files:
             file.seek(0)
 
     def build(self) -> Collection:
+        """Build a collection of articles from Scopus RIS files."""
         articles = self._get_articles_from_files()
         return Collection(Collection.deduplicate_articles(list(articles)))
 

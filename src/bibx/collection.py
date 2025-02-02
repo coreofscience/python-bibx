@@ -7,13 +7,15 @@ from functools import reduce
 
 import networkx as nx
 
-from bibx._entities.article import Article
+from .article import Article
 
 logger = logging.getLogger(__name__)
 
 
 @dataclass
 class Collection:
+    """A collection of scientific articles."""
+
     articles: list[Article]
 
     def merge(self, other: "Collection") -> "Collection":
@@ -81,6 +83,7 @@ class Collection:
         cls,
         articles: list[Article],
     ) -> list[Article]:
+        """Deduplicate a list of articles."""
         article_by_id = cls._uniqe_articles_by_id(articles)
 
         unique_articles: list[Article] = []
@@ -108,6 +111,7 @@ class Collection:
 
     @property
     def citation_pairs(self) -> Iterable[tuple[Article, Article]]:
+        """Return a generator with all citation pairs."""
         for article in self.articles:
             if not article.references:
                 continue

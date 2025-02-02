@@ -3,9 +3,9 @@ from enum import Enum
 from typing import Optional
 from urllib.parse import urlparse
 
-from bibx._entities.article import Article
-from bibx._entities.collection import Collection
+from bibx.article import Article
 from bibx.clients.openalex import OpenAlexClient, Work
+from bibx.collection import Collection
 
 from .base import CollectionBuilder
 
@@ -13,11 +13,15 @@ logger = logging.getLogger(__name__)
 
 
 class HandleReferences(Enum):
+    """How to handle references when building an openalex collection."""
+
     BASIC = "basic"
     FULL = "full"
 
 
 class OpenAlexCollectionBuilder(CollectionBuilder):
+    """Builder for collections of articles from the OpenAlex API."""
+
     def __init__(
         self,
         query: str,
