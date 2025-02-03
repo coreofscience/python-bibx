@@ -5,7 +5,7 @@ from typing import TextIO
 
 from bibx.algorithms.sap import Sap
 from bibx.article import Article
-from bibx.builders.openalex import HandleReferences, OpenAlexCollectionBuilder
+from bibx.builders.openalex import EnrichReferences, OpenAlexCollectionBuilder
 from bibx.builders.scopus_bib import ScopusBibCollectionBuilder
 from bibx.builders.scopus_ris import ScopusRisCollectionBuilder
 from bibx.builders.wos import WosCollectionBuilder
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 __all__ = [
     "Article",
     "Collection",
-    "HandleReferences",
+    "EnrichReferences",
     "Sap",
     "query_openalex",
     "read_any",
@@ -26,16 +26,16 @@ __all__ = [
     "read_wos",
 ]
 
-__version__ = "0.4.1"
+__version__ = "0.5.0"
 
 
 def query_openalex(
     query: str,
     limit: int = 600,
-    references: HandleReferences = HandleReferences.BASIC,
+    enrich: EnrichReferences = EnrichReferences.BASIC,
 ) -> Collection:
     """Query OpenAlex and return a collection."""
-    return OpenAlexCollectionBuilder(query, limit, references=references).build()
+    return OpenAlexCollectionBuilder(query, limit, enrich=enrich).build()
 
 
 def read_scopus_bib(*files: TextIO) -> Collection:

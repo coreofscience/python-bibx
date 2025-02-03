@@ -12,14 +12,16 @@ from .base import CollectionBuilder
 
 logger = logging.getLogger(__name__)
 
-MAX_REFERENCES = 400
+_COMMON_REFERENCES = 400
+_MOST_REFERENCES = 2000
 
 
-class HandleReferences(Enum):
+class EnrichReferences(Enum):
     """How to handle references when building an openalex collection."""
 
     BASIC = "basic"
     COMMON = "common"
+    MOST = "most"
     FULL = "full"
 
 
@@ -30,12 +32,12 @@ class OpenAlexCollectionBuilder(CollectionBuilder):
         self,
         query: str,
         limit: int = 600,
-        references: HandleReferences = HandleReferences.BASIC,
+        enrich: EnrichReferences = EnrichReferences.BASIC,
         client: Optional[OpenAlexClient] = None,
     ) -> None:
         self.query = query
         self.limit = limit
-        self.references = references
+        self.enrich = enrich
         self.client = client or OpenAlexClient()
 
     def build(self) -> Collection:
@@ -44,21 +46,23 @@ class OpenAlexCollectionBuilder(CollectionBuilder):
         works = self.client.list_recent_articles(self.query, self.limit)
         cache = {work.id: work for work in works}
         references: list[str] = []
+        missing = set()
         for work in works:
             references.extend(work.referenced_works)
-        if self.references == HandleReferences.COMMON:
+        if self.enrich in (EnrichReferences.COMMON, EnrichReferences.MOST):
             counter = Counter(references)
-            most_common = {key for key, _ in counter.most_common(MAX_REFERENCES)}
+            count = (
+                _MOST_REFERENCES
+                if self.enrich == EnrichReferences.MOST
+                else _COMMON_REFERENCES
+            )
+            most_common = {key for key, _ in counter.most_common(count)}
             missing = most_common - set(cache.keys())
-            logger.info("fetching %d missing references", len(missing))
-            missing_works = self.client.list_articles_by_openalex_id(list(missing))
-            cache.update({work.id: work for work in missing_works})
-        if self.references == HandleReferences.FULL:
+        if self.enrich == EnrichReferences.FULL:
             missing = set(references) - set(cache.keys())
-            logger.info("fetching %d missing references", len(missing))
-            missing_works = self.client.list_articles_by_openalex_id(list(missing))
-            cache.update({work.id: work for work in missing_works})
-
+        logger.info("fetching %d missing references", len(missing))
+        missing_works = self.client.list_articles_by_openalex_id(list(missing))
+        cache.update({work.id: work for work in missing_works})
         article_cache = {
             openalexid: self._work_to_article(work)
             for openalexid, work in cache.items()
