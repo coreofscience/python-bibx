@@ -1,4 +1,5 @@
 import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed, wait
 from enum import Enum
 from typing import Optional, Union
 
@@ -122,6 +123,18 @@ class OpenAlexClient:
             }
         )
 
+    def _fetch_works(self, params: dict[str, Union[str, int]]) -> WorkResponse:
+        response = self.session.get(
+            f"{self.base_url}/works",
+            params=params,
+        )
+        try:
+            response.raise_for_status()
+            data = response.json()
+            return WorkResponse.model_validate(data)
+        except (requests.RequestException, ValidationError) as error:
+            raise OpenAlexError(str(error)) from error
+
     def list_recent_articles(self, query: str, limit: int = 600) -> list[Work]:
         """List recent articles from the openalex API."""
         select = ",".join(Work.model_fields.keys())
@@ -134,56 +147,48 @@ class OpenAlexClient:
         )
         pages = (limit // MAX_WORKS_PER_PAGE) + 1
         results: list[Work] = []
-        for page in range(1, pages + 1):
-            logger.info("fetching page %d with filter %s", page, filter_)
-            params: dict[str, Union[str, int]] = {
-                "select": select,
-                "filter": filter_,
-                "sort": "publication_year:desc",
-                "per_page": MAX_WORKS_PER_PAGE,
-                "page": page,
-            }
-            response = self.session.get(
-                f"{self.base_url}/works",
-                params=params,
-            )
-            try:
-                response.raise_for_status()
-                data = response.json()
-                work_response = WorkResponse.model_validate(data)
-                logger.info(
-                    "fetched %d works in page %d", len(work_response.results), page
+        with ThreadPoolExecutor(max_workers=min(pages, 25)) as executor:
+            futures = [
+                executor.submit(
+                    self._fetch_works,
+                    {
+                        "select": select,
+                        "filter": filter_,
+                        "sort": "publication_year:desc",
+                        "per_page": MAX_WORKS_PER_PAGE,
+                        "page": page,
+                    },
                 )
+                for page in range(1, pages + 1)
+            ]
+            wait(futures)
+            for future in futures:
+                work_response = future.result()
                 results.extend(work_response.results)
-                if page * MAX_WORKS_PER_PAGE >= min(work_response.meta.count, limit):
+                if len(results) >= limit:
                     break
-            except (requests.RequestException, ValidationError) as error:
-                raise OpenAlexError(str(error)) from error
         return results[:limit]
 
     def list_articles_by_openalex_id(self, ids: list[str]) -> list[Work]:
         """List articles by openalex id."""
         select = ",".join(Work.model_fields.keys())
-        filter_ = ",".join([f"ids.openalex:{id_}" for id_ in ids])
         results: list[Work] = []
-        for ids_ in chunks(ids, MAX_IDS_PER_REQUEST):
-            value = "|".join(ids_)
-            filter_ = f"ids.openalex:{value},type:types/article"
-            logger.info("fetching %d ids from openalex", len(ids_))
-            params: dict[str, Union[str, int]] = {
-                "select": select,
-                "filter": filter_,
-                "per_page": MAX_IDS_PER_REQUEST,
-            }
-            response = self.session.get(
-                f"{self.base_url}/works",
-                params=params,
-            )
-            try:
-                response.raise_for_status()
-                data = response.json()
-                work_response = WorkResponse.model_validate(data)
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            futures = [
+                executor.submit(
+                    self._fetch_works,
+                    {
+                        "select": select,
+                        "filter": f"ids.openalex:{'|'.join(ids)},type:types/article",
+                        "per_page": MAX_IDS_PER_REQUEST,
+                    },
+                )
+                for ids in chunks(ids, MAX_IDS_PER_REQUEST)
+            ]
+            for future in as_completed(futures):
+                work_response = future.result()
+                logger.info(
+                    "got %s works from the openalex api", len(work_response.results)
+                )
                 results.extend(work_response.results)
-            except (requests.RequestException, ValidationError) as error:
-                raise OpenAlexError(str(error)) from error
         return results
