@@ -1,3 +1,4 @@
+import logging
 from collections.abc import Callable
 from enum import Enum
 from typing import TextIO
@@ -83,8 +84,14 @@ def openalex(
         help="how to handle references",
         default=HandleReferences.BASIC,
     ),
+    verbose: bool = typer.Option(
+        help="be more verbose",
+        default=False,
+    ),
 ) -> None:
     """Run the sap algorithm on a seed file of any supported format."""
+    if verbose:
+        logging.basicConfig(level=logging.INFO)
     c = query_openalex(" ".join(query), references=references)
     s = Sap()
     graph = s.create_graph(c)
