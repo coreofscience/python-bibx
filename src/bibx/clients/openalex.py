@@ -11,8 +11,9 @@ from bibx.utils import chunks
 
 logger = logging.getLogger(__name__)
 
-MAX_WORKS_PER_PAGE = 200
-MAX_IDS_PER_REQUEST = 80
+_MAX_WORKS_PER_PAGE = 200
+_MAX_IDS_PER_REQUEST = 80
+_MAX_CONNECTIONS = 5
 
 
 class AuthorPosition(Enum):
@@ -145,9 +146,9 @@ class OpenAlexClient:
                 "cited_by_count:>1",
             ]
         )
-        pages = (limit // MAX_WORKS_PER_PAGE) + 1
+        pages = (limit // _MAX_WORKS_PER_PAGE) + 1
         results: list[Work] = []
-        with ThreadPoolExecutor(max_workers=min(pages, 25)) as executor:
+        with ThreadPoolExecutor(max_workers=min(pages, _MAX_CONNECTIONS)) as executor:
             futures = [
                 executor.submit(
                     self._fetch_works,
@@ -155,7 +156,7 @@ class OpenAlexClient:
                         "select": select,
                         "filter": filter_,
                         "sort": "publication_year:desc",
-                        "per_page": MAX_WORKS_PER_PAGE,
+                        "per_page": _MAX_WORKS_PER_PAGE,
                         "page": page,
                     },
                 )
@@ -175,17 +176,17 @@ class OpenAlexClient:
             return []
         select = ",".join(Work.model_fields.keys())
         results: list[Work] = []
-        with ThreadPoolExecutor(max_workers=5) as executor:
+        with ThreadPoolExecutor(max_workers=_MAX_CONNECTIONS) as executor:
             futures = [
                 executor.submit(
                     self._fetch_works,
                     {
                         "select": select,
                         "filter": f"ids.openalex:{'|'.join(ids)},type:types/article",
-                        "per_page": MAX_IDS_PER_REQUEST,
+                        "per_page": _MAX_IDS_PER_REQUEST,
                     },
                 )
-                for ids in chunks(ids, MAX_IDS_PER_REQUEST)
+                for ids in chunks(ids, _MAX_IDS_PER_REQUEST)
             ]
             for future in as_completed(futures):
                 work_response = future.result()
