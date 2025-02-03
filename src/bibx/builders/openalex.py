@@ -1,4 +1,5 @@
 import logging
+from collections import Counter
 from enum import Enum
 from typing import Optional
 from urllib.parse import urlparse
@@ -11,11 +12,14 @@ from .base import CollectionBuilder
 
 logger = logging.getLogger(__name__)
 
+MAX_REFERENCES = 400
+
 
 class HandleReferences(Enum):
     """How to handle references when building an openalex collection."""
 
     BASIC = "basic"
+    COMMON = "common"
     FULL = "full"
 
 
@@ -39,14 +43,22 @@ class OpenAlexCollectionBuilder(CollectionBuilder):
         logger.info("building collection for query %s", self.query)
         works = self.client.list_recent_articles(self.query, self.limit)
         cache = {work.id: work for work in works}
+        references: list[str] = []
+        for work in works:
+            references.extend(work.referenced_works)
+        if self.references == HandleReferences.COMMON:
+            counter = Counter(references)
+            most_common = {key for key, _ in counter.most_common(MAX_REFERENCES)}
+            missing = most_common - set(cache.keys())
+            logger.info("fetching %d missing references", len(missing))
+            missing_works = self.client.list_articles_by_openalex_id(list(missing))
+            cache.update({work.id: work for work in missing_works})
         if self.references == HandleReferences.FULL:
-            references: list[str] = []
-            for work in works:
-                references.extend(work.referenced_works)
             missing = set(references) - set(cache.keys())
             logger.info("fetching %d missing references", len(missing))
             missing_works = self.client.list_articles_by_openalex_id(list(missing))
             cache.update({work.id: work for work in missing_works})
+
         article_cache = {
             openalexid: self._work_to_article(work)
             for openalexid, work in cache.items()
