@@ -16,7 +16,7 @@ from bibx import (
 )
 from bibx.algorithms.preprocess import Preprocess
 from bibx.algorithms.sap import Sap
-from bibx.builders.openalex import HandleReferences
+from bibx.builders.openalex import EnrichReferences
 from bibx.collection import Collection
 
 app = typer.Typer()
@@ -80,9 +80,9 @@ def sap(filename: str) -> None:
 @app.command()
 def openalex(
     query: list[str],
-    references: HandleReferences = typer.Option(
+    enrich: EnrichReferences = typer.Option(
         help="how to handle references",
-        default=HandleReferences.BASIC,
+        default=EnrichReferences.BASIC,
     ),
     verbose: bool = typer.Option(
         help="be more verbose",
@@ -92,7 +92,7 @@ def openalex(
     """Run the sap algorithm on a seed file of any supported format."""
     if verbose:
         logging.basicConfig(level=logging.INFO)
-    c = query_openalex(" ".join(query), references=references)
+    c = query_openalex(" ".join(query), enrich=enrich)
     s = Sap()
     graph = s.create_graph(c)
     graph = s.clean_graph(graph)

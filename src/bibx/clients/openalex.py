@@ -171,6 +171,8 @@ class OpenAlexClient:
 
     def list_articles_by_openalex_id(self, ids: list[str]) -> list[Work]:
         """List articles by openalex id."""
+        if not ids:
+            return []
         select = ",".join(Work.model_fields.keys())
         results: list[Work] = []
         with ThreadPoolExecutor(max_workers=5) as executor:
