@@ -11,6 +11,7 @@ from bibx import (
     query_openalex,
     read_any,
     read_scopus_bib,
+    read_scopus_csv,
     read_scopus_ris,
     read_wos,
 )
@@ -28,6 +29,7 @@ class Format(Enum):
     WOS = "wos"
     RIS = "ris"
     BIB = "bib"
+    CSV = "csv"
 
 
 @app.command()
@@ -41,12 +43,17 @@ def describe(format: Format, filename: str) -> None:
     if format == Format.RIS:
         with open(filename) as f:
             c = read_scopus_ris(f)
-        rprint(":boom: the file satisfies the ISI WOS format")
+        rprint(":boom: the file satisfies the scopus RIS format")
         rprint(f"There are {len(c.articles)} records parsed")
     if format == Format.BIB:
         with open(filename) as f:
             c = read_scopus_bib(f)
-        rprint(":boom: the file satisfies the ISI WOS format")
+        rprint(":boom: the file satisfies the scopus BIB format")
+        rprint(f"There are {len(c.articles)} records parsed")
+    if format == Format.CSV:
+        with open(filename) as f:
+            c = read_scopus_csv(f)
+        rprint(":boom: the file satisfies the scopus CSV format")
         rprint(f"There are {len(c.articles)} records parsed")
 
 
