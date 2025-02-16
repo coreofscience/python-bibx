@@ -30,7 +30,7 @@ jobs:
         uses: astral-sh/setup-uv@v2
         with:
           enable-cache: true
-          version: "0.5.26"
+          version: "0.6.0"
 
       - name: Run tests for ${{ matrix.python-version }}
         run: |
