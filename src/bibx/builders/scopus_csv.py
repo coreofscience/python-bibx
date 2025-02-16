@@ -63,7 +63,7 @@ class Row(BaseModel):
     references: Annotated[
         list[str],
         Field(validation_alias="References"),
-        BeforeValidator(lambda x: x.split("); ")),
+        BeforeValidator(_split_str),
     ]
     author_keywords: Annotated[
         list[str],
