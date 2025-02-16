@@ -1,7 +1,5 @@
 import logging
-from collections.abc import Callable
 from enum import Enum
-from typing import TextIO
 
 import networkx as nx
 import typer
@@ -15,10 +13,8 @@ from bibx import (
     read_scopus_ris,
     read_wos,
 )
-from bibx.algorithms.preprocess import Preprocess
 from bibx.algorithms.sap import Sap
 from bibx.builders.openalex import EnrichReferences
-from bibx.collection import Collection
 
 app = typer.Typer()
 
@@ -105,33 +101,6 @@ def openalex(
     graph = s.clean_graph(graph)
     graph = s.tree(graph)
     rprint(graph)
-
-
-def _read_many(
-    reader: Callable[[TextIO], Collection],
-    *filenames: str,
-) -> Collection:
-    first, *rest = filenames
-    with open(first) as f:
-        collection = reader(f)
-    for filename in rest:
-        with open(filename) as f:
-            collection = collection.merge(reader(f))
-    return collection
-
-
-@app.command()
-def preprocess(
-    output: str,
-    wos: list[str] = typer.Option(help="WoS files to pre process"),
-    scopus: list[str] = typer.Option(help="scopus files to preprocess"),
-) -> None:
-    """Preprocesses a collection."""
-    wos_collection = _read_many(read_wos, *wos)
-    scopus_collection = _read_many(read_scopus_ris, *scopus)
-    p = Preprocess(wos_collection, scopus_collection)
-    p.create_workbook(output)
-    rprint(f":boom: workbook created at {output}")
 
 
 if __name__ == "__main__":
