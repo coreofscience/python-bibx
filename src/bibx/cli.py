@@ -1,5 +1,6 @@
 import logging
 from enum import Enum
+from typing import Annotated
 
 import networkx as nx
 import typer
@@ -17,6 +18,17 @@ from bibx.algorithms.sap import Sap
 from bibx.builders.openalex import EnrichReferences
 
 app = typer.Typer()
+
+
+@app.callback()
+def main(
+    verbose: Annotated[  # noqa: FBT002
+        bool, typer.Option("--verbose", "-v", help="Enable verbose logging.")
+    ] = False,
+) -> None:
+    """BibX is a command-line tool for parsing bibliographic data."""
+    if verbose:
+        logging.basicConfig(level=logging.DEBUG)
 
 
 class Format(Enum):
