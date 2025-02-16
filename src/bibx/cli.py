@@ -1,5 +1,6 @@
 import logging
 from enum import Enum
+from typing import Annotated
 
 import networkx as nx
 import typer
@@ -9,6 +10,7 @@ from bibx import (
     query_openalex,
     read_any,
     read_scopus_bib,
+    read_scopus_csv,
     read_scopus_ris,
     read_wos,
 )
@@ -18,12 +20,24 @@ from bibx.builders.openalex import EnrichReferences
 app = typer.Typer()
 
 
+@app.callback()
+def main(
+    verbose: Annotated[  # noqa: FBT002
+        bool, typer.Option("--verbose", "-v", help="Enable verbose logging.")
+    ] = False,
+) -> None:
+    """BibX is a command-line tool for parsing bibliographic data."""
+    if verbose:
+        logging.basicConfig(level=logging.DEBUG)
+
+
 class Format(Enum):
     """Supported formats."""
 
     WOS = "wos"
     RIS = "ris"
     BIB = "bib"
+    CSV = "csv"
 
 
 @app.command()
@@ -37,12 +51,17 @@ def describe(format: Format, filename: str) -> None:
     if format == Format.RIS:
         with open(filename) as f:
             c = read_scopus_ris(f)
-        rprint(":boom: the file satisfies the ISI WOS format")
+        rprint(":boom: the file satisfies the scopus RIS format")
         rprint(f"There are {len(c.articles)} records parsed")
     if format == Format.BIB:
         with open(filename) as f:
             c = read_scopus_bib(f)
-        rprint(":boom: the file satisfies the ISI WOS format")
+        rprint(":boom: the file satisfies the scopus BIB format")
+        rprint(f"There are {len(c.articles)} records parsed")
+    if format == Format.CSV:
+        with open(filename) as f:
+            c = read_scopus_csv(f)
+        rprint(":boom: the file satisfies the scopus CSV format")
         rprint(f"There are {len(c.articles)} records parsed")
 
 

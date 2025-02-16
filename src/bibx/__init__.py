@@ -7,6 +7,7 @@ from bibx.algorithms.sap import Sap
 from bibx.article import Article
 from bibx.builders.openalex import EnrichReferences, OpenAlexCollectionBuilder
 from bibx.builders.scopus_bib import ScopusBibCollectionBuilder
+from bibx.builders.scopus_csv import ScopusCsvCollectionBuilder
 from bibx.builders.scopus_ris import ScopusRisCollectionBuilder
 from bibx.builders.wos import WosCollectionBuilder
 from bibx.collection import Collection
@@ -56,6 +57,15 @@ def read_scopus_ris(*files: TextIO) -> Collection:
     return ScopusRisCollectionBuilder(*files).build()
 
 
+def read_scopus_csv(*files: TextIO) -> Collection:
+    """Take any number of csv files from scopus and generates a collection.
+
+    :param files: Scopus csv files open.
+    :return: the collection
+    """
+    return ScopusCsvCollectionBuilder(*files).build()
+
+
 def read_wos(*files: TextIO) -> Collection:
     """Take any number of wos text files and returns a collection.
 
@@ -67,7 +77,7 @@ def read_wos(*files: TextIO) -> Collection:
 
 def read_any(file: TextIO) -> Collection:
     """Try to read a file with the supported formats."""
-    for handler in (read_wos, read_scopus_ris, read_scopus_bib):
+    for handler in (read_wos, read_scopus_ris, read_scopus_bib, read_scopus_csv):
         try:
             return handler(file)
         except BibXError as e:
