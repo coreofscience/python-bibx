@@ -99,6 +99,12 @@ class ScopusCsvCollectionBuilder(CollectionBuilder):
         reader = csv.DictReader(file)
         for row in reader:
             datum = Row.model_validate(row)
+            if not datum.authors or not datum.year:
+                logger.info(
+                    "skipping row with missing authors or year: %s",
+                    datum.model_dump_json(indent=2),
+                )
+                continue
             yield (
                 Article(
                     label="",
@@ -131,6 +137,9 @@ class ScopusCsvCollectionBuilder(CollectionBuilder):
     def _article_from_reference(self, reference: str) -> Optional[Article]:
         try:
             *authors, journal, issue, year = reference.split(", ")
+            if not authors:
+                message = "a minimum of one author is required"
+                raise ValueError(message)
             _year = int(year.lstrip("(").rstrip(")"))
             return Article(
                 label=reference,

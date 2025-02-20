@@ -87,10 +87,10 @@ class Article:
     @property
     def simple_id(self) -> Optional[str]:
         """Return a simple ID for the article."""
-        if self.authors and self.year is not None:
-            author = self.authors[0].split(" ")[0].replace(",", "")
-            return f"{author}{self.year}".lower()
-        return None
+        if not self.authors or self.year is None:
+            return None
+        author = self.authors[0].split(" ")[0].replace(",", "")
+        return f"{author}{self.year}".lower()
 
     def __repr__(self) -> str:
         """Return a string representation of the article."""
