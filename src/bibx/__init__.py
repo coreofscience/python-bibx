@@ -23,11 +23,12 @@ __all__ = [
     "query_openalex",
     "read_any",
     "read_scopus_bib",
+    "read_scopus_csv",
     "read_scopus_ris",
     "read_wos",
 ]
 
-__version__ = "0.6.1"
+__version__ = "0.6.2"
 
 
 def query_openalex(
@@ -77,7 +78,7 @@ def read_wos(*files: TextIO) -> Collection:
 
 def read_any(file: TextIO) -> Collection:
     """Try to read a file with the supported formats."""
-    for handler in (read_wos, read_scopus_ris, read_scopus_bib, read_scopus_csv):
+    for handler in (read_wos, read_scopus_ris, read_scopus_csv, read_scopus_bib):
         try:
             return handler(file)
         except BibXError as e:
