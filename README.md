@@ -9,8 +9,8 @@ A python library with bibliographic and biblio-metric tools.
 ## Features
 
 - Reads Web of Science (ISI) files.
-- Reads scopus bibtex files.
-- Merges scopus and ISI bibliographic collections.
+- Reads scopus bibtex, ris and csv files.
+- Merges bibliographic collections.
 - Implements the [SAP][sap] algorithm.
 - More features in the roadmap...
 
@@ -19,10 +19,10 @@ A python library with bibliographic and biblio-metric tools.
 Here's how to apply the sap algorithm:
 
 ```python
-from bibx import read_scopus, Sap
+from bibx import read_scopus_bib, Sap
 
 with open('./docs/examples/scopus.bib') as f:
-    c = read_scopus(f)
+    c = read_scopus_bib(f)
 s = Sap()
 g = s.create_graph(c)
 g = s.clean_graph(g)
