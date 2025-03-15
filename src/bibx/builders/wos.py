@@ -61,7 +61,7 @@ class WosCollectionBuilder(CollectionBuilder):
     """Builder for collections of articles from Web of Science (WoS) ISI files."""
 
     ISI_LINE_PATTERN = re.compile(
-        r"^(null|.)?((?P<field>[A-Z0-9]{2})|  )( (?P<value>.*))?$"
+        r"^((null)+|.)?((?P<field>[A-Z0-9]{2})|  )( (?P<value>.*))?$"
     )
     ISI_CITATION_PATTERN = re.compile(
         r"""^(?P<AU>[^,]+),[ ]          # First author
