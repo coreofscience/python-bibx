@@ -369,7 +369,7 @@ class WosCollectionBuilder(CollectionBuilder):
         if key in cls.FIELDS:
             field = cls.FIELDS[key]
             parsed_value = field.parse(value)
-            return {new_key: parsed_value for new_key in [field.key, *field.aliases]}
+            return dict.fromkeys([field.key, *field.aliases], parsed_value)
 
         logger.debug("Found an unknown field with key %s and value %s", key, value)
         return {key: _ident(value)}

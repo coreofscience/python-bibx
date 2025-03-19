@@ -113,3 +113,16 @@ build-backend = "hatchling.build"
 
 [tool.hatch.version]
 path = "src/bibx/__init__.py"
+
+[tool.tox]
+requires = ["tox>=4.24.2"]
+env_list = ["3.9", "3.10", "3.11", "3.12", "3.13"]
+
+[tool.tox.env_run_base]
+deps = [
+    "pytest>=8.3.5",
+    "ruff>=0.9.10",
+    "mypy~=1.9.0",
+    "types-requests>=2.32.0.20241016",
+]
+commands = [["ruff", "check"], ["pytest", "tests/"], ["mypy", "src/"]]

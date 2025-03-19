@@ -36,4 +36,7 @@ jobs:
         run: |
           uv sync
           uv run pre-commit run --all
-          uv run pytest
+          uv run pytest ./tests
+          uv run mypy ./src
+          uv run ruff check
+          uv run ruff format --check

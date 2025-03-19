@@ -91,11 +91,11 @@ class ScopusCsvCollectionBuilder(CollectionBuilder):
         articles = self._articles_from_files()
         return Collection(articles=Collection.deduplicate_articles(list(articles)))
 
-    def _articles_from_files(self) -> Generator[Article]:
+    def _articles_from_files(self) -> Generator[Article, None, None]:
         for file in self._files:
             yield from self._parse_file(file)
 
-    def _parse_file(self, file: TextIO) -> Generator[Article]:
+    def _parse_file(self, file: TextIO) -> Generator[Article, None, None]:
         reader = csv.DictReader(file)
         for row in reader:
             datum = Row.model_validate(row)
