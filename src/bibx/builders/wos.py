@@ -261,7 +261,7 @@ class WosCollectionBuilder(CollectionBuilder):
     def build(self) -> Collection:
         """Build a collection of articles from Web of Science (WoS) ISI files."""
         articles = self._get_articles_from_files()
-        return Collection(list(articles))
+        return Collection(Collection.deduplicate_articles(list(articles)))
 
     def _get_articles_as_str_from_files(self) -> Iterable[str]:
         for file in self._files:
@@ -369,7 +369,7 @@ class WosCollectionBuilder(CollectionBuilder):
         if key in cls.FIELDS:
             field = cls.FIELDS[key]
             parsed_value = field.parse(value)
-            return {new_key: parsed_value for new_key in [field.key, *field.aliases]}
+            return dict.fromkeys([field.key, *field.aliases], parsed_value)
 
         logger.debug("Found an unknown field with key %s and value %s", key, value)
         return {key: _ident(value)}

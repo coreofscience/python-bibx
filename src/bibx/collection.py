@@ -46,6 +46,8 @@ class Collection:
         graph = nx.Graph()
         id_to_article: defaultdict[str, list[Article]] = defaultdict(list)
         for article in cls._all_articles(articles):
+            if not article.ids:
+                continue
             first, *rest = article.ids
             # Add a loop edge so that the unique articles are included
             graph.add_edge(first, first)
@@ -74,7 +76,7 @@ class Collection:
                     articles.append(article)
                     visited.add(id(article))
             merged = reduce(Article.merge, articles)
-            article_by_id.update({id_: merged for id_ in ids})
+            article_by_id.update(dict.fromkeys(ids, merged))
 
         return article_by_id
 
