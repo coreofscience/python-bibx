@@ -94,6 +94,12 @@ class OpenAlexCollectionBuilder(CollectionBuilder):
 
     @classmethod
     def _work_to_article(cls, work: Work) -> Article:
+        journal = None
+        if work.primary_location and work.primary_location.source:
+            journal = work.primary_location.source.display_name
+        permalink = None
+        if work.primary_location and work.primary_location.landing_page_url:
+            permalink = work.primary_location.landing_page_url
         article = Article(
             label=work.id,
             ids={
@@ -105,16 +111,12 @@ class OpenAlexCollectionBuilder(CollectionBuilder):
             authors=[cls._invert_name(a.author.display_name) for a in work.authorships],
             year=work.publication_year,
             title=work.title,
-            journal=(
-                work.primary_location
-                and work.primary_location.source
-                and work.primary_location.source.display_name
-            ),
+            journal=journal,
             volume=work.biblio.volume,
             issue=work.biblio.issue,
             page=work.biblio.first_page,
             doi=cls._extract_doi(work.doi) if work.doi else None,
-            _permalink=work.primary_location and work.primary_location.landing_page_url,
+            _permalink=permalink,
             times_cited=work.cited_by_count,
             references=[cls._reference_to_article(r) for r in work.referenced_works],
             keywords=[k.display_name for k in work.keywords],
