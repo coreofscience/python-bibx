@@ -21,7 +21,7 @@ app = typer.Typer()
 
 
 @app.callback()
-def main(
+def set_verbose(
     verbose: Annotated[  # noqa: FBT002
         bool, typer.Option("--verbose", "-v", help="Enable verbose logging.")
     ] = False,
@@ -99,20 +99,19 @@ def openalex(
         help="how to handle references",
         default=EnrichReferences.BASIC,
     ),
-    verbose: bool = typer.Option(
-        help="be more verbose",
-        default=False,
-    ),
 ) -> None:
     """Run the sap algorithm on a seed file of any supported format."""
-    if verbose:
-        logging.basicConfig(level=logging.INFO)
     c = query_openalex(" ".join(query), enrich=enrich)
     s = Sap()
     graph = s.create_graph(c)
     graph = s.clean_graph(graph)
     graph = s.tree(graph)
     rprint(graph)
+
+
+def main() -> None:
+    """Entry point for the CLI."""
+    app()
 
 
 if __name__ == "__main__":

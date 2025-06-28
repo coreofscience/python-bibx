@@ -46,6 +46,8 @@ class Collection:
         graph = nx.Graph()
         id_to_article: defaultdict[str, list[Article]] = defaultdict(list)
         for article in cls._all_articles(articles):
+            if not article.ids:
+                continue
             first, *rest = article.ids
             # Add a loop edge so that the unique articles are included
             graph.add_edge(first, first)

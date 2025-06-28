@@ -13,7 +13,7 @@ dependencies = [
     "networkx~=3.0",
     "pydantic~=2.10.6",
     "requests~=2.32.3",
-    "typer[all]~=0.9.0",
+    "typer[all]~=0.16.0",
 ]
 requires-python = ">=3.9"
 classifiers = [
@@ -44,7 +44,7 @@ dev = [
 ]
 
 [project.scripts]
-bibx = "bibx.cli:app"
+bibx = "bibx.cli:main"
 
 [tool.ruff.lint]
 select = [

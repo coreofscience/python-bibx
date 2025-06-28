@@ -261,7 +261,7 @@ class WosCollectionBuilder(CollectionBuilder):
     def build(self) -> Collection:
         """Build a collection of articles from Web of Science (WoS) ISI files."""
         articles = self._get_articles_from_files()
-        return Collection(list(articles))
+        return Collection(Collection.deduplicate_articles(list(articles)))
 
     def _get_articles_as_str_from_files(self) -> Iterable[str]:
         for file in self._files:
