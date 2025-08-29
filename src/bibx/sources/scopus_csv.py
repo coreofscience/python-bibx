@@ -8,10 +8,10 @@ from typing import Annotated, Optional, TextIO
 from pydantic import BaseModel, Field
 from pydantic.functional_validators import BeforeValidator
 
-from bibx.article import Article
-from bibx.collection import Collection
+from bibx.models.article import Article
+from bibx.models.collection import Collection
 
-from .base import CollectionBuilder
+from .base import Source
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +78,7 @@ class Row(BaseModel):
     source: Annotated[str, Field(validation_alias="Source")]
 
 
-class ScopusCsvCollectionBuilder(CollectionBuilder):
+class ScopusCsvSource(Source):
     """Builder for Scopus data from CSV files."""
 
     def __init__(self, *files: TextIO) -> None:

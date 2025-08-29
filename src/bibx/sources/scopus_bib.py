@@ -6,14 +6,14 @@ from typing import Optional, TextIO
 
 import bibtexparser
 
-from bibx.article import Article
-from bibx.collection import Collection
 from bibx.exceptions import MissingCriticalInformationError
+from bibx.models.article import Article
+from bibx.models.collection import Collection
 
-from .base import CollectionBuilder
+from .base import Source
 
 
-class ScopusBibCollectionBuilder(CollectionBuilder):
+class ScopusBibSource(Source):
     """Builder for collections of articles from Scopus BibTeX files."""
 
     def __init__(self, *scopus_files: TextIO) -> None:

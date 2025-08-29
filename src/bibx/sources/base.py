@@ -1,9 +1,9 @@
 from typing import Protocol
 
-from bibx.collection import Collection
+from bibx.models.collection import Collection
 
 
-class CollectionBuilder(Protocol):
+class Source(Protocol):
     """Protocol for classes that build collections of articles."""
 
     def build(self) -> Collection:

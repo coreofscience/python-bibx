@@ -1,5 +1,5 @@
-from bibx.article import Article
-from bibx.collection import Collection
+from bibx.models.article import Article
+from bibx.models.collection import Collection
 
 articles = [
     Article(
