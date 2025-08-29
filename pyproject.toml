@@ -11,7 +11,7 @@ dynamic = ["version"]
 dependencies = [
     "bibtexparser~=1.4.0",
     "networkx~=3.0",
-    "pydantic~=2.10.6",
+    "pydantic~=2.11.7",
     "requests~=2.32.3",
     "typer~=0.16.0",
 ]
@@ -35,10 +35,10 @@ classifiers = [
 
 [dependency-groups]
 dev = [
-    "pytest~=8.3.4",
-    "pre-commit~=2.20.0",
-    "ruff~=0.8.2",
-    "mypy~=1.9.0",
+    "pytest~=8.4.1",
+    "pre-commit~=4.3.0",
+    "ruff~=0.12.11",
+    "mypy~=1.17.1",
     "types-requests>=2.32.0.20241016",
     "ipython>=8.18.1",
 ]
