@@ -1,10 +1,10 @@
 from bibx.article import Article
 from bibx.collection import Collection
 
-from .base import CollectionBuilder
+from .base import Source
 
 
-class SimpleCollectionBuilder(CollectionBuilder):
+class SimpleSource(Source):
     """Builder for collections of articles from a list of articles."""
 
     def __init__(self, articles: list[Article]) -> None:

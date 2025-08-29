@@ -5,13 +5,13 @@ from typing import TextIO
 
 from bibx.algorithms.sap import Sap
 from bibx.article import Article
-from bibx.builders.openalex import EnrichReferences, OpenAlexCollectionBuilder
-from bibx.builders.scopus_bib import ScopusBibCollectionBuilder
-from bibx.builders.scopus_csv import ScopusCsvCollectionBuilder
-from bibx.builders.scopus_ris import ScopusRisCollectionBuilder
-from bibx.builders.wos import WosCollectionBuilder
 from bibx.collection import Collection
 from bibx.exceptions import BibXError
+from bibx.sources.openalex import EnrichReferences, OpenAlexSource
+from bibx.sources.scopus_bib import ScopusBibSource
+from bibx.sources.scopus_csv import ScopusCsvSource
+from bibx.sources.scopus_ris import ScopusRisSource
+from bibx.sources.wos import WosSource
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ def query_openalex(
     enrich: EnrichReferences = EnrichReferences.BASIC,
 ) -> Collection:
     """Query OpenAlex and return a collection."""
-    return OpenAlexCollectionBuilder(query, limit, enrich=enrich).build()
+    return OpenAlexSource(query, limit, enrich=enrich).build()
 
 
 def read_scopus_bib(*files: TextIO) -> Collection:
@@ -46,7 +46,7 @@ def read_scopus_bib(*files: TextIO) -> Collection:
     :param files: Scopus bib files open.
     :return: the collection
     """
-    return ScopusBibCollectionBuilder(*files).build()
+    return ScopusBibSource(*files).build()
 
 
 def read_scopus_ris(*files: TextIO) -> Collection:
@@ -55,7 +55,7 @@ def read_scopus_ris(*files: TextIO) -> Collection:
     :param files: Scopus bib files open.
     :return: the collection
     """
-    return ScopusRisCollectionBuilder(*files).build()
+    return ScopusRisSource(*files).build()
 
 
 def read_scopus_csv(*files: TextIO) -> Collection:
@@ -64,7 +64,7 @@ def read_scopus_csv(*files: TextIO) -> Collection:
     :param files: Scopus csv files open.
     :return: the collection
     """
-    return ScopusCsvCollectionBuilder(*files).build()
+    return ScopusCsvSource(*files).build()
 
 
 def read_wos(*files: TextIO) -> Collection:
@@ -73,7 +73,7 @@ def read_wos(*files: TextIO) -> Collection:
     :param files: WoS files open.
     :return: the collection
     """
-    return WosCollectionBuilder(*files).build()
+    return WosSource(*files).build()
 
 
 def read_any(file: TextIO) -> Collection:

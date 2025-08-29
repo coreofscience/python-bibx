@@ -8,7 +8,7 @@ from bibx.article import Article
 from bibx.collection import Collection
 from bibx.exceptions import InvalidScopusFileError, MissingCriticalInformationError
 
-from .base import CollectionBuilder
+from .base import Source
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ def _joined(raw: Optional[list[str]]) -> Optional[str]:
     return " ".join(raw)
 
 
-class ScopusRisCollectionBuilder(CollectionBuilder):
+class ScopusRisSource(Source):
     """Builder for collections of articles from Scopus RIS files."""
 
     def __init__(self, *ris_files: TextIO) -> None:

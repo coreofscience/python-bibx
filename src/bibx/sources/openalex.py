@@ -8,7 +8,7 @@ from bibx.article import Article
 from bibx.clients.openalex import OpenAlexClient, Work
 from bibx.collection import Collection
 
-from .base import CollectionBuilder
+from .base import Source
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ class EnrichReferences(Enum):
     FULL = "full"
 
 
-class OpenAlexCollectionBuilder(CollectionBuilder):
+class OpenAlexSource(Source):
     """Builder for collections of articles from the OpenAlex API."""
 
     def __init__(

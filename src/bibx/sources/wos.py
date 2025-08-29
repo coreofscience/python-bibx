@@ -15,7 +15,7 @@ from bibx.exceptions import (
     MissingCriticalInformationError,
 )
 
-from .base import CollectionBuilder
+from .base import Source
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +57,7 @@ class _IsiField:
         return self.parser(value)
 
 
-class WosCollectionBuilder(CollectionBuilder):
+class WosSource(Source):
     """Builder for collections of articles from Web of Science (WoS) ISI files."""
 
     ISI_LINE_PATTERN = re.compile(
