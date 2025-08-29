@@ -4,9 +4,9 @@ from collections import defaultdict
 from collections.abc import Iterable
 from typing import Optional, TextIO
 
-from bibx.article import Article
-from bibx.collection import Collection
 from bibx.exceptions import InvalidScopusFileError, MissingCriticalInformationError
+from bibx.models.article import Article
+from bibx.models.collection import Collection
 
 from .base import Source
 

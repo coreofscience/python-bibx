@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from bibx.collection import Collection
+from bibx.models.collection import Collection
 
 
 class Source(Protocol):

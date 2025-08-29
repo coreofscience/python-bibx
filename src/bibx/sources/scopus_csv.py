@@ -8,8 +8,8 @@ from typing import Annotated, Optional, TextIO
 from pydantic import BaseModel, Field
 from pydantic.functional_validators import BeforeValidator
 
-from bibx.article import Article
-from bibx.collection import Collection
+from bibx.models.article import Article
+from bibx.models.collection import Collection
 
 from .base import Source
 

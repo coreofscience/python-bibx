@@ -4,9 +4,9 @@ import logging
 from typing import TextIO
 
 from bibx.algorithms.sap import Sap
-from bibx.article import Article
-from bibx.collection import Collection
 from bibx.exceptions import BibXError
+from bibx.models.article import Article
+from bibx.models.collection import Collection
 from bibx.sources.openalex import EnrichReferences, OpenAlexSource
 from bibx.sources.scopus_bib import ScopusBibSource
 from bibx.sources.scopus_csv import ScopusCsvSource
