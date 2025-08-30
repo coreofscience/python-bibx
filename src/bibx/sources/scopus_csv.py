@@ -3,24 +3,24 @@
 import csv
 import logging
 from collections.abc import Generator
-from typing import Annotated, Optional, TextIO
+from typing import Annotated, TextIO
 
 from pydantic import BaseModel, Field
 from pydantic.functional_validators import BeforeValidator
 
-from bibx.article import Article
-from bibx.collection import Collection
+from bibx.models.article import Article
+from bibx.models.collection import Collection
 
-from .base import CollectionBuilder
+from .base import Source
 
 logger = logging.getLogger(__name__)
 
 
-def _str_or_none(value: Optional[str]) -> Optional[str]:
+def _str_or_none(value: str | None) -> str | None:
     return value if value else None
 
 
-def _split_str(value: Optional[str]) -> list[str]:
+def _split_str(value: str | None) -> list[str]:
     return value.strip().split("; ") if value else []
 
 
@@ -36,27 +36,27 @@ class Row(BaseModel):
     title: Annotated[str, Field(validation_alias="Title")]
     journal: Annotated[str, Field(validation_alias="Abbreviated Source Title")]
     volume: Annotated[
-        Optional[str],
+        str | None,
         Field(validation_alias="Volume"),
         BeforeValidator(_str_or_none),
     ]
     issue: Annotated[
-        Optional[str],
+        str | None,
         Field(validation_alias="Issue"),
         BeforeValidator(_str_or_none),
     ]
     page: Annotated[
-        Optional[str],
+        str | None,
         Field(validation_alias="Page start"),
         BeforeValidator(_str_or_none),
     ]
     doi: Annotated[
-        Optional[str],
+        str | None,
         Field(validation_alias="DOI"),
         BeforeValidator(_str_or_none),
     ]
     cited_by: Annotated[
-        Optional[int],
+        int | None,
         Field(validation_alias="Cited by"),
         BeforeValidator(_str_or_none),
     ]
@@ -78,7 +78,7 @@ class Row(BaseModel):
     source: Annotated[str, Field(validation_alias="Source")]
 
 
-class ScopusCsvCollectionBuilder(CollectionBuilder):
+class ScopusCsvSource(Source):
     """Builder for Scopus data from CSV files."""
 
     def __init__(self, *files: TextIO) -> None:
@@ -134,7 +134,7 @@ class ScopusCsvCollectionBuilder(CollectionBuilder):
                 .set_simple_label()
             )
 
-    def _article_from_reference(self, reference: str) -> Optional[Article]:
+    def _article_from_reference(self, reference: str) -> Article | None:
         try:
             *authors, journal, issue, year = reference.split(", ")
             if not authors:

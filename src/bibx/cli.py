@@ -15,7 +15,7 @@ from bibx import (
     read_wos,
 )
 from bibx.algorithms.sap import Sap
-from bibx.builders.openalex import EnrichReferences
+from bibx.sources.openalex import EnrichReferences
 
 app = typer.Typer()
 

@@ -140,7 +140,7 @@ class Collection:
 
         :return: a dictionary with the number of articles published each year.
         """
-        current_year = datetime.datetime.now(datetime.timezone.utc).year
+        current_year = datetime.datetime.now(datetime.UTC).year
         years = {}
         for year in range(self._first_year, current_year + 1):
             years[year] = 0
@@ -164,7 +164,7 @@ class Collection:
 
         :return: a dictionary with the number of citations each year.
         """
-        current_year = datetime.datetime.now(datetime.timezone.utc).year
+        current_year = datetime.datetime.now(datetime.UTC).year
         cited_items_per_year = {}
         for year in range(self._first_year, current_year + 1):
             cited_items_per_year[year] = 0

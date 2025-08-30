@@ -1,7 +1,6 @@
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed, wait
 from enum import Enum
-from typing import Optional, Union
 
 import requests
 from pydantic import BaseModel, ValidationError
@@ -29,7 +28,7 @@ class Author(BaseModel):
 
     id: str
     display_name: str
-    orcid: Optional[str] = None
+    orcid: str | None = None
 
 
 class WorkAuthorship(BaseModel):
@@ -51,10 +50,10 @@ class WorkKeyword(BaseModel):
 class WorkBiblio(BaseModel):
     """Work bibliographic information from the openalex API."""
 
-    volume: Optional[str] = None
-    issue: Optional[str] = None
-    first_page: Optional[str] = None
-    last_page: Optional[str] = None
+    volume: str | None = None
+    issue: str | None = None
+    first_page: str | None = None
+    last_page: str | None = None
 
 
 class WorkLocationSource(BaseModel):
@@ -69,9 +68,9 @@ class WorkLoacation(BaseModel):
     """Location of the work from the openalex API."""
 
     is_oa: bool
-    landing_page_url: Optional[str] = None
-    pdf_url: Optional[str] = None
-    source: Optional[WorkLocationSource]
+    landing_page_url: str | None = None
+    pdf_url: str | None = None
+    source: WorkLocationSource | None
 
 
 class Work(BaseModel):
@@ -79,15 +78,15 @@ class Work(BaseModel):
 
     id: str
     ids: dict[str, str]
-    doi: Optional[str] = None
-    title: Optional[str] = None
+    doi: str | None = None
+    title: str | None = None
     publication_year: int
     authorships: list[WorkAuthorship]
     cited_by_count: int
     keywords: list[WorkKeyword]
     referenced_works: list[str]
     biblio: WorkBiblio
-    primary_location: Optional[WorkLoacation] = None
+    primary_location: WorkLoacation | None = None
 
 
 class ResponseMeta(BaseModel):
@@ -110,8 +109,8 @@ class OpenAlexClient:
 
     def __init__(
         self,
-        base_url: Optional[str] = None,
-        email: Optional[str] = None,
+        base_url: str | None = None,
+        email: str | None = None,
     ) -> None:
         self.base_url = base_url or "https://api.openalex.org"
         self.session = requests.Session()
@@ -124,7 +123,7 @@ class OpenAlexClient:
             }
         )
 
-    def _fetch_works(self, params: dict[str, Union[str, int]]) -> WorkResponse:
+    def _fetch_works(self, params: dict[str, str | int]) -> WorkResponse:
         response = self.session.get(
             f"{self.base_url}/works",
             params=params,

@@ -2,18 +2,18 @@ import json
 import re
 from collections.abc import Iterable
 from contextlib import suppress
-from typing import Optional, TextIO
+from typing import TextIO
 
 import bibtexparser
 
-from bibx.article import Article
-from bibx.collection import Collection
 from bibx.exceptions import MissingCriticalInformationError
+from bibx.models.article import Article
+from bibx.models.collection import Collection
 
-from .base import CollectionBuilder
+from .base import Source
 
 
-class ScopusBibCollectionBuilder(CollectionBuilder):
+class ScopusBibSource(Source):
     """Builder for collections of articles from Scopus BibTeX files."""
 
     def __init__(self, *scopus_files: TextIO) -> None:
@@ -69,7 +69,7 @@ class ScopusBibCollectionBuilder(CollectionBuilder):
             .set_simple_label()
         )
 
-    def _articles_from_references(self, references: Optional[str]) -> Iterable[Article]:
+    def _articles_from_references(self, references: str | None) -> Iterable[Article]:
         if references is None:
             references = ""
         for reference in references.split("; "):

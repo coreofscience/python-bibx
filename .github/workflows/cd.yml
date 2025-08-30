@@ -20,7 +20,7 @@ jobs:
         uses: astral-sh/setup-uv@v2
         with:
           enable-cache: true
-          version: "0.6.0"
+          version: "0.8.13"
 
       - name: Install dependencies
         run: |
