@@ -2,7 +2,7 @@ import json
 import re
 from collections.abc import Iterable
 from contextlib import suppress
-from typing import Optional, TextIO
+from typing import TextIO
 
 import bibtexparser
 
@@ -69,7 +69,7 @@ class ScopusBibSource(Source):
             .set_simple_label()
         )
 
-    def _articles_from_references(self, references: Optional[str]) -> Iterable[Article]:
+    def _articles_from_references(self, references: str | None) -> Iterable[Article]:
         if references is None:
             references = ""
         for reference in references.split("; "):

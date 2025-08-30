@@ -1,7 +1,6 @@
 import logging
 from collections import Counter
 from enum import Enum
-from typing import Optional
 from urllib.parse import urlparse
 
 from bibx.clients.openalex import OpenAlexClient, Work
@@ -33,7 +32,7 @@ class OpenAlexSource(Source):
         query: str,
         limit: int = 600,
         enrich: EnrichReferences = EnrichReferences.BASIC,
-        client: Optional[OpenAlexClient] = None,
+        client: OpenAlexClient | None = None,
     ) -> None:
         self.query = query
         self.limit = limit

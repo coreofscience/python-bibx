@@ -2,7 +2,7 @@ import logging
 import re
 from collections import defaultdict
 from collections.abc import Iterable
-from typing import Optional, TextIO
+from typing import TextIO
 
 from bibx.exceptions import InvalidScopusFileError, MissingCriticalInformationError
 from bibx.models.article import Article
@@ -22,7 +22,7 @@ def _size(file: TextIO) -> int:
     return size
 
 
-def _int_or_nothing(raw: Optional[list[str]]) -> Optional[int]:
+def _int_or_nothing(raw: list[str] | None) -> int | None:
     if not raw:
         return None
     try:
@@ -31,7 +31,7 @@ def _int_or_nothing(raw: Optional[list[str]]) -> Optional[int]:
         return None
 
 
-def _joined(raw: Optional[list[str]]) -> Optional[str]:
+def _joined(raw: list[str] | None) -> str | None:
     if not raw:
         return None
     return " ".join(raw)
@@ -86,7 +86,7 @@ class ScopusRisSource(Source):
         return data, ref[last_index:]
 
     @staticmethod
-    def _find_doi(ref: str) -> tuple[Optional[str], str]:
+    def _find_doi(ref: str) -> tuple[str | None, str]:
         pattern = re.compile(
             r"((doi.org\/)|(aps.org\/doi\/)|(DOI:?)) ?(?P<doi>[^\s,;:]{5,})", re.I
         )

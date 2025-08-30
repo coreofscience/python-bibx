@@ -2,10 +2,10 @@ import collections
 import functools
 import logging
 import re
-from collections.abc import Iterable, Mapping
+from collections.abc import Callable, Iterable, Mapping
 from contextlib import suppress
 from dataclasses import dataclass
-from typing import Any, Callable, ClassVar, Optional, TextIO, Union
+from typing import Any, ClassVar, TextIO
 
 from bibx.exceptions import (
     InvalidIsiLineError,
@@ -53,7 +53,7 @@ class _IsiField:
     parser: Callable
     aliases: list[str]
 
-    def parse(self, value: list[str]) -> Union[str, int, list[str]]:
+    def parse(self, value: list[str]) -> str | int | list[str]:
         return self.parser(value)
 
 
@@ -279,7 +279,7 @@ class WosSource(Source):
 
     @classmethod
     def _get_articles_from_references(
-        cls, references: Optional[list[str]]
+        cls, references: list[str] | None
     ) -> Iterable[Article]:
         if not references:
             return

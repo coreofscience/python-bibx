@@ -12,10 +12,10 @@ dependencies = [
     "bibtexparser~=1.4.0",
     "networkx~=3.0",
     "pydantic~=2.11.7",
-    "requests~=2.32.3",
-    "typer~=0.16.0",
+    "requests~=2.32.5",
+    "typer~=0.17.3",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
@@ -39,8 +39,8 @@ dev = [
     "pre-commit~=4.3.0",
     "ruff~=0.12.11",
     "mypy~=1.17.1",
-    "types-requests>=2.32.0.20241016",
-    "ipython>=8.18.1",
+    "types-requests~=2.32.4.20250809",
+    "ipython~=9.5.0",
 ]
 
 [project.scripts]
@@ -116,7 +116,7 @@ path = "src/bibx/__init__.py"
 
 [tool.tox]
 requires = ["tox>=4.24.2"]
-env_list = ["3.9", "3.10", "3.11", "3.12", "3.13"]
+env_list = ["3.11", "3.12", "3.13"]
 
 [tool.tox.env_run_base]
 deps = [

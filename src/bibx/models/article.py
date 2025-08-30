@@ -1,6 +1,6 @@
 from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Optional, TypeVar, Union
+from typing import TypeVar
 
 T = TypeVar("T")
 
@@ -20,15 +20,15 @@ class Article:
     label: str
     ids: set[str]
     authors: list[str] = field(default_factory=list)
-    year: Optional[int] = None
-    title: Optional[str] = None
-    journal: Optional[str] = None
-    volume: Optional[str] = None
-    issue: Optional[str] = None
-    page: Optional[str] = None
-    doi: Optional[str] = None
-    _permalink: Optional[str] = None
-    times_cited: Optional[int] = None
+    year: int | None = None
+    title: str | None = None
+    journal: str | None = None
+    volume: str | None = None
+    issue: str | None = None
+    page: str | None = None
+    doi: str | None = None
+    _permalink: str | None = None
+    times_cited: int | None = None
     references: list["Article"] = field(default_factory=list)
     keywords: list[str] = field(default_factory=list)
     sources: set[str] = field(default_factory=set)
@@ -61,7 +61,7 @@ class Article:
         return next(iter(sorted(self.ids)))
 
     @property
-    def simple_label(self) -> Optional[str]:
+    def simple_label(self) -> str | None:
         """Return a simple label for the article."""
         pieces = {
             "AU": self.authors[0].replace(",", "") if self.authors else None,
@@ -76,7 +76,7 @@ class Article:
         return ", ".join(value for value in pieces.values() if value)
 
     @property
-    def permalink(self) -> Optional[str]:
+    def permalink(self) -> str | None:
         """Return the permalink of the article."""
         if self._permalink is not None:
             return self._permalink
@@ -85,7 +85,7 @@ class Article:
         return None
 
     @property
-    def simple_id(self) -> Optional[str]:
+    def simple_id(self) -> str | None:
         """Return a simple ID for the article."""
         if not self.authors or self.year is None:
             return None
@@ -112,7 +112,7 @@ class Article:
 
     def info(
         self,
-    ) -> dict[str, Union[str, int, list[str], None]]:
+    ) -> dict[str, str | int | list[str] | None]:
         """Return a dictionary with the information of the article."""
         return {
             "permalink": self.permalink,
