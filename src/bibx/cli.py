@@ -109,6 +109,14 @@ def openalex(
     rprint(graph)
 
 
+@app.command()
+def csv(filename: str) -> None:
+    """Parse a scopus CSV file and print the collection."""
+    with open(filename) as f:
+        c = read_scopus_csv(f)
+    rprint(list(c.citation_pairs))
+
+
 def main() -> None:
     """Entry point for the CLI."""
     app()
