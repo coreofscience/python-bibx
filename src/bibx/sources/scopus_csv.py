@@ -13,7 +13,7 @@ from bibx.models.collection import Collection
 
 from .base import Source
 
-_NUM_AHTOR_PARTS = 3
+_NUM_AUTHOR_PARTS = 3
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ def _rotate_authors(authors: list[str]) -> list[str]:
     result = []
     for author in authors:
         parts = author.split(", ")
-        if len(parts) != _NUM_AHTOR_PARTS:
+        if len(parts) != _NUM_AUTHOR_PARTS:
             logger.debug("unexpected author format: %s", author)
             result.append(author)
             continue
