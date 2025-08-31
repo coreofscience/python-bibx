@@ -13,6 +13,8 @@ from bibx.models.collection import Collection
 
 from .base import Source
 
+_NUM_AHTOR_PARTS = 3
+
 logger = logging.getLogger(__name__)
 
 
@@ -22,6 +24,19 @@ def _str_or_none(value: str | None) -> str | None:
 
 def _split_str(value: str | None) -> list[str]:
     return value.strip().split("; ") if value else []
+
+
+def _rotate_authors(authors: list[str]) -> list[str]:
+    result = []
+    for author in authors:
+        parts = author.split(", ")
+        if len(parts) != _NUM_AHTOR_PARTS:
+            logger.debug("unexpected author format: %s", author)
+            result.append(author)
+            continue
+        initials, last, _ = parts
+        result.append(f"{last}, {initials}")
+    return result
 
 
 class Row(BaseModel):
@@ -34,7 +49,7 @@ class Row(BaseModel):
     ]
     year: Annotated[int, Field(validation_alias="Year")]
     title: Annotated[str, Field(validation_alias="Title")]
-    journal: Annotated[str, Field(validation_alias="Abbreviated Source Title")]
+    journal: Annotated[str, Field(validation_alias="Source title")]
     volume: Annotated[
         str | None,
         Field(validation_alias="Volume"),
@@ -110,7 +125,7 @@ class ScopusCsvSource(Source):
                     label="",
                     ids=set(),
                     title=datum.title,
-                    authors=datum.authors,
+                    authors=_rotate_authors(datum.authors),
                     year=datum.year,
                     journal=datum.journal,
                     volume=datum.volume,
