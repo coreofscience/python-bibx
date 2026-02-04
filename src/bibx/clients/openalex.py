@@ -26,7 +26,7 @@ class AuthorPosition(Enum):
 class Author(BaseModel):
     """An author from the openalex API."""
 
-    id: str
+    id: str | None = None
     display_name: str
     orcid: str | None = None
 
@@ -80,7 +80,7 @@ class Work(BaseModel):
     ids: dict[str, str]
     doi: str | None = None
     title: str | None = None
-    publication_year: int
+    publication_year: int | None = None
     authorships: list[WorkAuthorship]
     cited_by_count: int
     keywords: list[WorkKeyword]
